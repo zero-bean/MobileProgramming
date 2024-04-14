@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1019643839431",
+    "project_id": "gameland-7d778",
+    "storage_bucket": "gameland-7d778.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019643839431:android:d031ec945bbbeea89b4fe2",
+        "android_client_info": {
+          "package_name": "com.gcu.gameland"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD-Q96JjkEKsC98n1RE-SH_uXfm0DIIxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
