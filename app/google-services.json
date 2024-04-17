@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1019643839431",
+    "firebase_url": "https://gameland-7d778-default-rtdb.firebaseio.com",
     "project_id": "gameland-7d778",
     "storage_bucket": "gameland-7d778.appspot.com"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.gcu.gameland"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1019643839431-j9aucr5uq4t1m7r6nnfuo8r0iplbd7u1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gcu.gameland",
+            "certificate_hash": "6e1a869007e8eb4d32bbea19f971d0719f84bae4"
+          }
+        },
+        {
+          "client_id": "1019643839431-g2ds6b26u01aig3va5k62h4m25oefnp4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDD-Q96JjkEKsC98n1RE-SH_uXfm0DIIxs"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1019643839431-g2ds6b26u01aig3va5k62h4m25oefnp4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

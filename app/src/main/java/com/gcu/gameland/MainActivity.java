@@ -1,5 +1,6 @@
 package com.gcu.gameland;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button sendBtn;
     private Button getBtn;
+    private Button logoutBtn;
     private EditText testText;
     private TextView resultText;
 
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         sendBtn = findViewById(R.id.sendTextButton);
         getBtn = findViewById(R.id.getDataButton);
+        logoutBtn = findViewById(R.id.logoutButton);
         testText = findViewById(R.id.testText1);
         resultText = findViewById(R.id.testResultText);
         
@@ -59,6 +63,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+            }
+        });
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+
+                // 로그인 화면으로 전환
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
             }
         });
 
