@@ -45,6 +45,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.firebase:firebase-database")
 
+    // circular imageView
+    implementation ("com.mikhaellopez:circularimageview:4.3.1")
+
+    // Glide - 이미지 url 가져오기
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

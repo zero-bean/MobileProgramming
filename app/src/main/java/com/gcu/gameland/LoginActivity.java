@@ -29,6 +29,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import DTO.UserData;
 
 public class LoginActivity extends AppCompatActivity {
     private final String TAG = "LoginActivity";
@@ -148,10 +152,8 @@ public class LoginActivity extends AppCompatActivity {
     private void updateUI(FirebaseUser user) {
         if(user != null) {
             Toast.makeText(getApplicationContext(), user.getEmail(), Toast.LENGTH_SHORT).show();
-            //Toast.makeText(getApplicationContext(), "GREAT", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "Need Login", Toast.LENGTH_SHORT).show();
-
         }
     }
 

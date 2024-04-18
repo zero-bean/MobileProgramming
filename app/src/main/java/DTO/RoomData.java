@@ -4,6 +4,10 @@ public class RoomData {
     private String roomID;
     private String roomName;
 
+    public RoomData() {
+
+    }
+
     public RoomData(String roomID, String roomName) {
         this.roomID = roomID;
         this.roomName = roomName;
