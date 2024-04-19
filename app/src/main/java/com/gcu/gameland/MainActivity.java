@@ -41,11 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
     private UserData myUserData;
 
-    private Button sendBtn;
-    private Button getBtn;
-    private Button logoutBtn;
-    private EditText testText;
-    private TextView resultText;
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
 
@@ -55,11 +50,6 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        sendBtn = findViewById(R.id.sendTextButton);
-        getBtn = findViewById(R.id.getDataButton);
-        logoutBtn = findViewById(R.id.logoutButton);
-        testText = findViewById(R.id.testText1);
-        resultText = findViewById(R.id.testResultText);
         profileImageView = findViewById(R.id.profileCircularImageView);
         profileNameTextView = findViewById(R.id.profileNameTextView);
 
@@ -72,34 +62,6 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-        });
-
-        sendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String msg = testText.getText().toString();
-                testText.setText("");
-                Log.d("testText", "content: " + msg);
-                myRef.push().setValue(msg);
-            }
-        });
-
-        getBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        logoutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-
-                // 로그인 화면으로 전환
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-            }
         });
 
     }
