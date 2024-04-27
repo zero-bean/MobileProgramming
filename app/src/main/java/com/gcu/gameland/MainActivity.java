@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
+    private Button changeProfileBtn;
+    private Button logoutBtn;
+    private Button enterStoreBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
         profileImageView = findViewById(R.id.profileCircularImageView);
         profileNameTextView = findViewById(R.id.profileNameTextView);
+        changeProfileBtn = findViewById(R.id.changeProfileButton);
+        logoutBtn = findViewById(R.id.logoutButton);
+        enterStoreBtn = findViewById(R.id.enterStoreButton);
 
         // [START initialize_auth]
         // Initialize Firebase Auth
@@ -62,6 +69,23 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        changeProfileBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Great!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                mAuth.signOut();
+                finish();
+                startActivity(intent);
+            }
         });
 
     }

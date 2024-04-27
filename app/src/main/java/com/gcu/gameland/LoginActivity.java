@@ -39,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+    private static AuthCredential credential;
     private TextView signInWithGoogleTextView;
 
 
@@ -90,6 +91,8 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
+        } else {
+            mGoogleSignInClient.revokeAccess();
         }
         //updateUI(currentUser);
     }
@@ -125,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
 
     // [START auth_with_google]
     private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -163,4 +166,5 @@ public class LoginActivity extends AppCompatActivity {
         TextView needLoginTextView = findViewById(R.id.needLoginText);
         needLoginTextView.startAnimation(anim);
     }
+
 }
