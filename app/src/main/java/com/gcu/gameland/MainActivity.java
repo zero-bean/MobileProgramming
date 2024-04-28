@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -44,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
+    private Button createRoomBtn;
+    private Button enterRoomBtn;
+    private Button findRoomBtn;
     private Button changeProfileBtn;
     private Button logoutBtn;
     private Button enterStoreBtn;
@@ -56,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
 
         profileImageView = findViewById(R.id.profileCircularImageView);
         profileNameTextView = findViewById(R.id.profileNameTextView);
+        createRoomBtn = findViewById(R.id.createRoomButton);
+        enterRoomBtn = findViewById(R.id.enterRoomButton);
+        findRoomBtn = findViewById(R.id.findRoomButton);
         changeProfileBtn = findViewById(R.id.changeProfileButton);
         logoutBtn = findViewById(R.id.logoutButton);
         enterStoreBtn = findViewById(R.id.enterStoreButton);
@@ -69,6 +78,36 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        createRoomBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View dialogView = getLayoutInflater().inflate(R.layout.dialog_tilte_write, null);
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setView(dialogView);
+
+                final AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
+                Button cancelBtn = dialogView.findViewById(R.id.TWDCancleButton);
+                Button confirmBtn = dialogView.findViewById(R.id.TWDConfirmButton);
+                EditText editText = dialogView.findViewById(R.id.TWDEditText);
+
+                confirmBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getApplicationContext(), editText.getText().toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
+            }
         });
 
         changeProfileBtn.setOnClickListener(new View.OnClickListener() {
