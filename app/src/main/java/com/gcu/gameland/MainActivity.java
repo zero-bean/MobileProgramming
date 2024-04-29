@@ -83,28 +83,20 @@ public class MainActivity extends AppCompatActivity {
         createRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                View dialogView = getLayoutInflater().inflate(R.layout.dialog_tilte_write, null);
-                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setView(dialogView);
+                TitleWriteDialog dialog = new TitleWriteDialog(MainActivity.this);
+                dialog.show();
 
-                final AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-
-                Button cancelBtn = dialogView.findViewById(R.id.TWDCancleButton);
-                Button confirmBtn = dialogView.findViewById(R.id.TWDConfirmButton);
-                EditText editText = dialogView.findViewById(R.id.TWDEditText);
-
-                confirmBtn.setOnClickListener(new View.OnClickListener() {
+                dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), editText.getText().toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), dialog.getEnteredText(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
-                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                dialog.setOnCancelClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        alertDialog.dismiss();
+                        dialog.dismiss();
                     }
                 });
             }

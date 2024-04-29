@@ -1,28 +1,48 @@
 package com.gcu.gameland;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-public class TitleWriteDialog {
-//    public TitleWriteDialog(Context context) {
-//        super(context);
-//    }
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        // 화면 설정
-//        WindowManager.LayoutParams lpWindow = new WindowManager.LayoutParams();
-//        lpWindow.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-//        lpWindow.dimAmount = 0.8f;
-//        getWindow().setAttributes(lpWindow);
-//
-//        // setContentView가 아래에 있어야함 그래야 전체가 안 보임
-//        setContentView(R.layout.error_dialog);
-//
-//        init();
-//
-//        setErrorMsg();
-//        closeBtn.setOnClickListener(closeDialog);
-//    }
+import androidx.annotation.NonNull;
+
+public class TitleWriteDialog extends Dialog {
+
+    private Button cancelBtn;
+    private Button confirmBtn;
+    private EditText editText;
+
+    public TitleWriteDialog(@NonNull Context context) {
+        super(context);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.dialog_tilte_write);
+        initViews();
+    }
+
+    private void initViews() {
+        cancelBtn = findViewById(R.id.TWDCancleButton);
+        confirmBtn = findViewById(R.id.TWDConfirmButton);
+        editText = findViewById(R.id.TWDEditText);
+    }
+
+    public void setOnCancelClickListener(View.OnClickListener listener) {
+        cancelBtn.setOnClickListener(listener);
+    }
+
+    public void setOnConfirmClickListener(View.OnClickListener listener) {
+        confirmBtn.setOnClickListener(listener);
+    }
+
+    public String getEnteredText() {
+        return editText.getText().toString();
+    }
 }
+
