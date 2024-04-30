@@ -51,6 +51,9 @@ dependencies {
     // Glide - 이미지 url 가져오기
     implementation ("com.github.bumptech.glide:glide:4.16.0")
 
+    // Material Design 3
+    implementation ("com.google.android.material:material:1.13.0-alpha01")
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
