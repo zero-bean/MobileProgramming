@@ -10,12 +10,21 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class GameLobbyActivity extends AppCompatActivity {
 
+    private GameLobbyFragment gameLobbyFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_lobby);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+
+        gameLobbyFragment = new GameLobbyFragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.gameLobbyFrameLayout, gameLobbyFragment)
+                .commit();
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.gameLobbyFrameLayout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;

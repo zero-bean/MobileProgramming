@@ -9,4 +9,6 @@
     <string name="content_description_search">Description for search</string>
     <string name="content_description_favorite">Description for favorite</string>
     <string name="content_description_more">Description for more</string>
+
+    <string name="nameLabel">닉네임</string>
 </resources>

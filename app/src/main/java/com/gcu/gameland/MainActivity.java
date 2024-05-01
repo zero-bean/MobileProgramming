@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Toast.makeText(getApplicationContext(), dialog.getEnteredText(), Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                        dialog.dismiss();
+                        finish();
+                        startActivity(intent);
                     }
                 });
 
