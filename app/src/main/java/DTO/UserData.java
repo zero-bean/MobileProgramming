@@ -1,6 +1,8 @@
 package DTO;
 
-public class UserData {
+import java.io.Serializable;
+
+public class UserData implements Serializable {
     private String UID;
     private String nickName;
     private String imageURL;

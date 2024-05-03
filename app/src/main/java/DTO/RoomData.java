@@ -1,20 +1,24 @@
 package DTO;
 
-public class RoomData {
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class RoomData implements Serializable {
     private String roomID;
     private String roomName;
     private String roomAdminID;
-    private int headCount;
+
+    private ArrayList<String> userList;
 
     public RoomData() {
-
+        userList = new ArrayList<>();
     }
-
-    public RoomData(String roomID, String roomName, String roomAdminID, int headCount) {
+    
+    public RoomData(String roomID, String roomName, String roomAdminID) {
         this.roomID = roomID;
         this.roomName = roomName;
         this.roomAdminID = roomAdminID;
-        this.headCount = headCount;
+        userList = new ArrayList<>();
     }
 
     public void setRoomID(String roomID) {
@@ -26,9 +30,6 @@ public class RoomData {
     public void setRoomAdminID(String roomAdminID) {
         this.roomAdminID = roomAdminID;
     }
-    public void setHeadCount(int headCount) {
-        this.headCount = headCount;
-    }
 
     public String getRoomID() {
         return this.roomID;
@@ -37,5 +38,8 @@ public class RoomData {
         return this.roomName;
     }
     public String getRoomAdminID() { return this.roomAdminID; }
-    public int getHeadCount() { return this.headCount;}
+    public ArrayList<String> getUserList() { return this.userList; }
+
+    public void addUser(String user) { userList.add(user); }
+    public void deleteUser(String user) { userList.remove(user); }
 }

@@ -34,6 +34,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import java.util.Random;
+
+import DTO.RoomData;
 import DTO.UserData;
 
 public class MainActivity extends AppCompatActivity {
@@ -89,11 +92,32 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), dialog.getEnteredText(), Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                        Random random = new Random();
+                        DatabaseReference roomsRef = myRef.child("rooms");
+
+                        int roomNumber;
+                        RoomData roomInfo;
+
+                        do {
+                            roomNumber = random.nextInt(10000);
+                        } while (roomExists(roomsRef, roomNumber));
+
+                        String roomID = Integer.toString(roomNumber);
+                        String roomName = dialog.getEnteredText();
+                        String roomAdminID = currentUser.getUid();
+                        roomInfo = new RoomData(roomID, roomName, roomAdminID);
+                        roomInfo.addUser(roomAdminID);
+                        roomsRef.child(roomID).setValue(roomInfo);
+
                         dialog.dismiss();
-                        finish();
+
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("RoomID", roomNumber);
+
+                        Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                        intent.putExtras(bundle);
                         startActivity(intent);
+                        finish();
                     }
                 });
 
@@ -103,6 +127,13 @@ public class MainActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 });
+            }
+        });
+
+        findRoomBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
@@ -189,5 +220,21 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "유저 프로필 이미지 갱신 실패, 이미지 URL: NULL");
         }
+    }
+
+    private boolean roomExists(DatabaseReference roomsRef, int roomNumber) {
+        final boolean[] exists = {false};
+        roomsRef.child(Integer.toString(roomNumber)).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                exists[0] = dataSnapshot.exists();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // ...
+            }
+        });
+        return exists[0];
     }
 }

@@ -8,8 +8,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class GameLobbyActivity extends AppCompatActivity {
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+public class GameLobbyActivity extends AppCompatActivity {
+    private final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private final DatabaseReference myRef = database.getReference();
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
     private GameLobbyFragment gameLobbyFragment;
 
     @Override

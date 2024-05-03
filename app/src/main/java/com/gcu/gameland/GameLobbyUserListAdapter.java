@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import DTO.UserData;
 
-public class GameRoomUserListAdapter extends BaseAdapter {
+public class GameLobbyUserListAdapter extends BaseAdapter {
     ArrayList<UserData> items = new ArrayList<UserData>();
     Context context;
 
