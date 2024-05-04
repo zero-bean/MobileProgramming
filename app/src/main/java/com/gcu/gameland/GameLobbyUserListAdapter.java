@@ -48,6 +48,7 @@ public class GameLobbyUserListAdapter extends BaseAdapter {
 
         Glide.with(context).load(userData.getImageURL()).into(userImageView);
         userNameTextView.setText(userData.getNickName());
+        userNameTextView.setFocusable(false);
 
         return convertView;
     }

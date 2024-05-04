@@ -130,10 +130,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findRoomBtn.setOnClickListener(new View.OnClickListener() {
+        enterRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getApplicationContext(), GameRoomActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -149,8 +151,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 mAuth.signOut();
-                finish();
                 startActivity(intent);
+                finish();
             }
         });
 

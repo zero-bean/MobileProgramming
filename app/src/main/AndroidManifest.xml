@@ -13,6 +13,9 @@
         android:theme="@style/Theme.GameLand"
         tools:targetApi="31">
         <activity
+            android:name=".GameRoomActivity"
+            android:exported="false" />
+        <activity
             android:name=".GameRoomListActivity"
             android:exported="false"
             android:label="@string/title_activity_game_room_list"
