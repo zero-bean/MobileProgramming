@@ -16,8 +16,6 @@ import com.google.firebase.database.FirebaseDatabase;
 public class GameLobbyActivity extends AppCompatActivity {
     private final FirebaseDatabase database = FirebaseDatabase.getInstance();
     private final DatabaseReference myRef = database.getReference();
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
     private GameLobbyFragment gameLobbyFragment;
 
     @Override
@@ -26,7 +24,9 @@ public class GameLobbyActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_lobby);
 
-        gameLobbyFragment = new GameLobbyFragment();
+        Bundle bundle = getIntent().getExtras();
+        int roomID = bundle.getInt("RoomID");
+        gameLobbyFragment = GameLobbyFragment.newInstance(roomID);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.gameLobbyFrameLayout, gameLobbyFragment)

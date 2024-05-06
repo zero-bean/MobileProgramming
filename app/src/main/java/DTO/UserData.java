@@ -24,4 +24,18 @@ public class UserData implements Serializable {
     public String getUID() { return UID; }
     public String getNickName() { return nickName; }
     public String getImageURL() { return imageURL; }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        UserData userData = (UserData) obj;
+        return UID.equals(userData.UID) &&
+                nickName.equals(userData.nickName) &&
+                imageURL.equals(userData.imageURL);
+    }
 }

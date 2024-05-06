@@ -5,23 +5,31 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -30,6 +38,7 @@ import DTO.RoomData;
 import DTO.UserData;
 
 public class GameRoomActivity extends AppCompatActivity {
+    private final String TAG = "GameRoomActivity";
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
     private ListView listView;
     private MaterialToolbar toolbar;
@@ -51,6 +60,20 @@ public class GameRoomActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RoomData roomData = (RoomData) adapter.getItem(position);
+                updateRoomInfo(roomData);
+                Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("RoomID", Integer.parseInt(roomData.getRoomID()));
+                intent.putExtras(bundle);
+                startActivity(intent);
+                finish();
+            }
         });
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -80,6 +103,42 @@ public class GameRoomActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // ...
+            }
+        });
+    }
+
+    private void updateRoomInfo(RoomData roomData) {
+        DatabaseReference roomRef = myRef.child("rooms").child(roomData.getRoomID());
+        roomRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                RoomData roomInfo = mutableData.getValue(RoomData.class);
+                if (roomInfo == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                String currentUserUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                if (!roomInfo.getUserList().contains(currentUserUID)) {
+                    roomInfo.getUserList().add(currentUserUID);
+                }
+
+                mutableData.setValue(roomInfo);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot currentData) {
+                if (databaseError != null) {
+                    Log.e(TAG, "트랜잭션 실패", databaseError.toException());
+                } else {
+                    if (committed) {
+                        Log.d(TAG, "룸 정보 업데이트 성공");
+                    } else {
+                        Log.d(TAG, "룸 정보 업데이트 실패: 트랜잭션이 중단됨");
+                    }
+                }
             }
         });
     }

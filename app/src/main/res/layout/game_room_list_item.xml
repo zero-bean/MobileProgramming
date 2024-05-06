@@ -8,30 +8,33 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/gameRoomListLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_container"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="10dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/gameRoomItemListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="77dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:hint="닉네임">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/roomInfoTextView"
+            android:text="방 정보"
+            android:gravity="center"
+            android:layout_gravity="top|center"
+            android:textColor="@color/primary_container_on"
+            android:layout_marginBottom="10dp"/>
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/gameRoomItemListTextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="@color/primary_container_on"
-                android:textStyle="bold"
-                android:text="방 제목"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/roomTitleTextView"
+            android:text="방 제목"
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_gravity="top|center"
+            android:textColor="@color/primary_container_on"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

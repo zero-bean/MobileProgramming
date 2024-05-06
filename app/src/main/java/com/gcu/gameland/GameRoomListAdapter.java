@@ -4,8 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -44,13 +46,11 @@ public class GameRoomListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.game_room_list_item, parent, false);
         }
 
-        TextInputLayout textInputLayout = convertView.findViewById(R.id.gameRoomItemListLayout);
-        TextView GameRoomTextView = convertView.findViewById(R.id.gameRoomItemListTextView);
+        TextView gameRoomInfo = convertView.findViewById(R.id.roomInfoTextView);
+        TextView gameRoomTitle = convertView.findViewById(R.id.roomTitleTextView);
 
-        textInputLayout.setHint("[방 번호:" + roomData.getRoomID() + "] / [인원:" + roomData.getUserList().size() + "]");
-        GameRoomTextView.setText(roomData.getRoomName());
-        GameRoomTextView.setFocusable(false);
-        textInputLayout.setFocusable(false);
+        gameRoomInfo.setText("[방 번호:" + roomData.getRoomID() + "] / [인원:" + roomData.getUserList().size() + "]");
+        gameRoomTitle.setText(roomData.getRoomName());
 
         return convertView;
     }

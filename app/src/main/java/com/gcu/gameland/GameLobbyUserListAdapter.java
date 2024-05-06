@@ -53,6 +53,16 @@ public class GameLobbyUserListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public void addUserData(UserData userData) { items.add(userData); }
+    public void addUserData(UserData userData) {
+        if (!isUserExists(userData)) {
+            items.add(userData);
+        }
+    }
+
+    public boolean isUserExists(UserData userData) {
+        return items.contains(userData);
+    }
+
+    public void clear() {items.clear();}
 
 }
