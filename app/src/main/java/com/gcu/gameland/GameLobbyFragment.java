@@ -11,7 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +31,6 @@ import DTO.RoomData;
 import DTO.UserData;
 
 public class GameLobbyFragment extends Fragment {
-    private final String TAG = "GameLobbyFragment";
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private ValueEventListener userListListener;
@@ -38,6 +39,8 @@ public class GameLobbyFragment extends Fragment {
     private ListView listView;
     private GameLobbyUserListAdapter adapter;
     private MaterialToolbar toolbar;
+    private Button selectGameBtn;
+    private Button startGameBtn;
 
     public GameLobbyFragment() {
         // Required empty public constructor
@@ -80,21 +83,42 @@ public class GameLobbyFragment extends Fragment {
         ref.addValueEventListener(userListListener);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        removeUser(roomID);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_game_lobby, container, false);
 
         listView = (ListView) rootView.findViewById(R.id.userListView);
+        selectGameBtn = rootView.findViewById(R.id.selectGameButton);
+        startGameBtn = rootView.findViewById(R.id.startGameButton);
         toolbar = rootView.findViewById(R.id.GameLobbyTopAppBar);
         toolbar.setTitle(roomID + " / " + roomName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
-                removeUser(roomID);
                 startActivity(intent);
                 requireActivity().finish();
+            }
+        });
+
+        selectGameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        startGameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAdminAndStartGame();
             }
         });
 
@@ -198,5 +222,30 @@ public class GameLobbyFragment extends Fragment {
         });
     }
 
+    private void checkAdminAndStartGame() {
+        DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
+        roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                RoomData roomInfo = snapshot.getValue(RoomData.class);
+                if (roomInfo != null && roomInfo.getRoomAdminID().equals(currentUser.getUid())) {
+                    // 방 관리자이므로 게임을 시작할 수 있음
+                    startGame();
+                } else {
+                    // 방 관리자가 아니므로 Toast를 통해 알림
+                    Toast.makeText(getActivity(), "You are not the admin!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // onCancelled 처리
+            }
+        });
+    }
+
+    private void startGame() {
+        Toast.makeText(getActivity(), "Game started!", Toast.LENGTH_SHORT).show();
+    }
 
 }

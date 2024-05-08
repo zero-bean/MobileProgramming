@@ -69,7 +69,8 @@ public class GameRoomActivity extends AppCompatActivity {
                 updateRoomInfo(roomData);
                 Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt("RoomID", Integer.parseInt(roomData.getRoomID()));
+                bundle.putInt("roomID", Integer.parseInt(roomData.getRoomID()));
+                bundle.putString("roomName", roomData.getRoomName());
                 intent.putExtras(bundle);
                 startActivity(intent);
                 finish();
