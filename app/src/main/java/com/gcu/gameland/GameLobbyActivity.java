@@ -25,8 +25,9 @@ public class GameLobbyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game_lobby);
 
         Bundle bundle = getIntent().getExtras();
-        int roomID = bundle.getInt("RoomID");
-        gameLobbyFragment = GameLobbyFragment.newInstance(roomID);
+        int roomID = bundle.getInt("roomID");
+        String roomName = bundle.getString("roomName");
+        gameLobbyFragment = GameLobbyFragment.newInstance(roomID, roomName);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.gameLobbyFrameLayout, gameLobbyFragment)

@@ -9,27 +9,27 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 
-public class TitleWriteDialog extends Dialog {
+public class FindRoomDialog extends Dialog {
 
     private Button cancelBtn;
     private Button confirmBtn;
     private EditText editText;
 
-    public TitleWriteDialog(@NonNull Context context) {
+    public FindRoomDialog(@NonNull Context context) {
         super(context);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_tilte_write);
+        setContentView(R.layout.dialog_find_room);
         initViews();
     }
 
     private void initViews() {
-        cancelBtn = findViewById(R.id.TWDCancleButton);
-        confirmBtn = findViewById(R.id.TWDConfirmButton);
-        editText = findViewById(R.id.TWDEditText);
+        cancelBtn = findViewById(R.id.findRoomCancleButton);
+        confirmBtn = findViewById(R.id.findRoomConfirmButton);
+        editText = findViewById(R.id.findRoomEditText);
     }
 
     public void setOnCancelClickListener(View.OnClickListener listener) {
@@ -44,4 +44,3 @@ public class TitleWriteDialog extends Dialog {
         return editText.getText().toString();
     }
 }
-

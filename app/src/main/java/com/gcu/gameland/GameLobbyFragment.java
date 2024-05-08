@@ -34,6 +34,7 @@ public class GameLobbyFragment extends Fragment {
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private ValueEventListener userListListener;
     private int roomID;
+    private String roomName;
     private ListView listView;
     private GameLobbyUserListAdapter adapter;
     private MaterialToolbar toolbar;
@@ -42,10 +43,11 @@ public class GameLobbyFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static GameLobbyFragment newInstance(int roomID) {
+    public static GameLobbyFragment newInstance(int roomID, String roomName) {
         GameLobbyFragment fragment = new GameLobbyFragment();
         Bundle args = new Bundle();
-        args.putInt("RoomID", roomID);
+        args.putInt("roomID", roomID);
+        args.putString("roomName", roomName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,7 +58,8 @@ public class GameLobbyFragment extends Fragment {
 
         Bundle bundle = getArguments();
         if (bundle != null) {
-            roomID = bundle.getInt("RoomID");
+            roomID = bundle.getInt("roomID");
+            roomName = bundle.getString("roomName");
         }
 
         adapter = new GameLobbyUserListAdapter();
@@ -84,6 +87,7 @@ public class GameLobbyFragment extends Fragment {
 
         listView = (ListView) rootView.findViewById(R.id.userListView);
         toolbar = rootView.findViewById(R.id.GameLobbyTopAppBar);
+        toolbar.setTitle(roomID + " / " + roomName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

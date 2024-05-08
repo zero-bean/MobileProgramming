@@ -1,6 +1,9 @@
 package com.gcu.gameland;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +28,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.dialog.MaterialDialogs;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +39,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import DTO.RoomData;
@@ -88,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TitleWriteDialog dialog = new TitleWriteDialog(MainActivity.this);
                 dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
@@ -112,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
                         dialog.dismiss();
 
                         Bundle bundle = new Bundle();
-                        bundle.putInt("RoomID", roomNumber);
+                        bundle.putInt("roomID", roomNumber);
+                        bundle.putString("roomName", roomName);
 
                         Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
                         intent.putExtras(bundle);
@@ -139,10 +147,57 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        changeProfileBtn.setOnClickListener(new View.OnClickListener() {
+        findRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Great!", Toast.LENGTH_SHORT).show();
+                FindRoomDialog dialog = new FindRoomDialog(MainActivity.this);
+                dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                dialog.setOnConfirmClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String roomID = dialog.getEnteredText();
+                        DatabaseReference roomsRef = myRef.child("rooms").child(roomID);
+
+                        roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    dialog.dismiss();
+
+                                    RoomData roomInfo = snapshot.getValue(RoomData.class);
+                                    ArrayList<String> userList = roomInfo.getUserList();
+                                    userList.add(currentUser.getUid());
+                                    roomsRef.child("userList").setValue(userList);
+
+                                    Bundle bundle = new Bundle();
+                                    bundle.putInt("roomID", Integer.parseInt(roomID));
+                                    bundle.putString("roomName", roomInfo.getRoomName());
+
+                                    Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "해당 방이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                // ...
+                            }
+                        });
+                    }
+                });
+
+                dialog.setOnCancelClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
             }
         });
 
