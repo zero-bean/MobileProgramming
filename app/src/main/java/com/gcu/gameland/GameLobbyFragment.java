@@ -1,6 +1,8 @@
 package com.gcu.gameland;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -111,6 +115,42 @@ public class GameLobbyFragment extends Fragment {
         selectGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SelectGameDialog dialog = new SelectGameDialog(requireActivity());
+                dialog.show();
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                // 선택된 라디오 버튼의 텍스트를 저장할 변수
+                final String[] selectedRadioText = {null};
+
+                dialog.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        // 선택된 라디오 버튼의 인덱스 찾기
+                        int radioButtonID = group.getCheckedRadioButtonId();
+                        View radioButton = group.findViewById(radioButtonID);
+
+                        // 선택된 라디오 버튼의 텍스트 가져오기
+                        selectedRadioText[0] = ((RadioButton) radioButton).getText().toString();
+                    }
+                });
+
+                dialog.setOnConfirmClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (selectedRadioText[0] != null) {
+                            Toast.makeText(getContext(), selectedRadioText[0], Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    }
+                });
+
+                dialog.setOnCancelClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+
+                    }
+                });
 
             }
         });

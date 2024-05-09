@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/selectGameDialog"
+    android:layout_width="312dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rectangle_bottom_button"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/selectGameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="게임 선택"
+        android:textColor="@color/primary_on"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/selectGameRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/selectGameFirstRadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="숫자 입력하기"
+            android:textColor="@color/primary_on"
+            android:textStyle="bold" />
+
+        <RadioButton
+            android:id="@+id/selectGameSecondRadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="테스트용 2"
+            android:textColor="@color/primary_on"
+            android:textStyle="bold" />
+
+        <RadioButton
+            android:id="@+id/selectGameThirdRadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="테스트용 3"
+            android:textColor="@color/primary_on"
+            android:textStyle="bold" />
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="246dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/selectGameConfirmButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rectangle_bottom_button"
+            android:backgroundTint="@color/primary_container"
+            android:text="확인"
+            android:textColor="@color/primary_container_on"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Space
+            android:layout_width="87dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/selectGameCancleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rectangle_bottom_button"
+            android:backgroundTint="#f70000"
+            android:text="취소"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
+
+</LinearLayout>
