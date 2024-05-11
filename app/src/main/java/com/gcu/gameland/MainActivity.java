@@ -1,35 +1,25 @@
 package com.gcu.gameland;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.dialog.MaterialDialogs;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -66,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
         profileImageView = findViewById(R.id.profileCircularImageView);
@@ -82,12 +71,6 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         createRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                         bundle.putInt("roomID", roomNumber);
                         bundle.putString("roomName", roomName);
 
-                        Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         intent.putExtras(bundle);
                         startActivity(intent);
                         finish();
@@ -141,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         enterRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), GameRoomActivity.class);
+                Intent intent = new Intent(getApplicationContext(), RoomListActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -175,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                                     bundle.putInt("roomID", Integer.parseInt(roomID));
                                     bundle.putString("roomName", roomInfo.getRoomName());
 
-                                    Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                                    Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                                     intent.putExtras(bundle);
                                     startActivity(intent);
                                     finish();

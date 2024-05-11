@@ -3,11 +3,9 @@ package com.gcu.gameland;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -17,17 +15,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
@@ -35,9 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import DTO.RoomData;
-import DTO.UserData;
 
-public class GameRoomActivity extends AppCompatActivity {
+public class RoomListActivity extends AppCompatActivity {
     private final String TAG = "GameRoomActivity";
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
     private ListView listView;
@@ -46,28 +38,21 @@ public class GameRoomActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_game_room);
+        setContentView(R.layout.activity_room_list);
 
         listView = findViewById(R.id.gameRoomListView);
         toolbar = findViewById(R.id.gameRoomTopAppBar);
 
-        GameRoomListAdapter adapter = new GameRoomListAdapter();
+        RoomListAdapter adapter = new RoomListAdapter();
         updateRoomList(adapter);
         listView.setAdapter(adapter);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.gameRoomLayout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RoomData roomData = (RoomData) adapter.getItem(position);
                 updateRoomInfo(roomData);
-                Intent intent = new Intent(getApplicationContext(), GameLobbyActivity.class);
+                Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putInt("roomID", Integer.parseInt(roomData.getRoomID()));
                 bundle.putString("roomName", roomData.getRoomName());
@@ -87,7 +72,7 @@ public class GameRoomActivity extends AppCompatActivity {
         });
     }
 
-    private void updateRoomList(GameRoomListAdapter adapter) {
+    private void updateRoomList(RoomListAdapter adapter) {
         myRef.child("rooms").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

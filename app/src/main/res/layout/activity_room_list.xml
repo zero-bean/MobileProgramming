@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/primary_container"
-    tools:context=".GameLobbyFragment">
+    tools:context=".RoomListActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/gameRoomAppBarLayout"

@@ -4,20 +4,16 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,121 +30,103 @@ import java.util.ArrayList;
 import DTO.RoomData;
 import DTO.UserData;
 
-public class GameLobbyFragment extends Fragment {
+public class LobbyActivity extends AppCompatActivity {
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private ValueEventListener userListListener;
     private int roomID;
     private String roomName;
     private ListView listView;
-    private GameLobbyUserListAdapter adapter;
+    private LobbyUserListAdapter adapter;
     private MaterialToolbar toolbar;
     private Button selectGameBtn;
     private Button startGameBtn;
 
-    public GameLobbyFragment() {
-        // Required empty public constructor
-    }
-
-    public static GameLobbyFragment newInstance(int roomID, String roomName) {
-        GameLobbyFragment fragment = new GameLobbyFragment();
-        Bundle args = new Bundle();
-        args.putInt("roomID", roomID);
-        args.putString("roomName", roomName);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private String selectedGame;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_lobby);
 
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            roomID = bundle.getInt("roomID");
-            roomName = bundle.getString("roomName");
-        }
+        selectedGame = null;
 
-        adapter = new GameLobbyUserListAdapter();
+        Intent intent = getIntent();
+        roomID = intent.getIntExtra("roomID", 0);
+        roomName = intent.getStringExtra("roomName");
+
+        adapter = new LobbyUserListAdapter();
 
         userListListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists())
+                    return;
+
                 updateAdapter(adapter, roomID);
+
+                RoomData roomInfo = snapshot.getValue(RoomData.class);
+                if(roomInfo.getSelectedGame() != null) {
+                    startGame(roomInfo.getSelectedGame());
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                    // ....
+                //
             }
         };
 
-        DatabaseReference ref = myRef.child("rooms").child(Integer.toString(roomID)).child("userList");
+        DatabaseReference ref = myRef.child("rooms").child(Integer.toString(roomID));
         ref.addValueEventListener(userListListener);
-    }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        removeUser(roomID);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_game_lobby, container, false);
-
-        listView = (ListView) rootView.findViewById(R.id.userListView);
-        selectGameBtn = rootView.findViewById(R.id.selectGameButton);
-        startGameBtn = rootView.findViewById(R.id.startGameButton);
-        toolbar = rootView.findViewById(R.id.GameLobbyTopAppBar);
+        listView = findViewById(R.id.userListView);
+        selectGameBtn = findViewById(R.id.selectGameButton);
+        startGameBtn = findViewById(R.id.startGameButton);
+        toolbar = findViewById(R.id.GameLobbyTopAppBar);
         toolbar.setTitle(roomID + " / " + roomName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(requireActivity(), MainActivity.class);
+                Intent intent = new Intent(LobbyActivity.this, MainActivity.class);
                 startActivity(intent);
-                requireActivity().finish();
+                removeUser(roomID);
+                finish();
             }
         });
 
         selectGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SelectGameDialog dialog = new SelectGameDialog(requireActivity());
+                SelectGameDialog dialog = new SelectGameDialog(LobbyActivity.this);
                 dialog.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-                // 선택된 라디오 버튼의 텍스트를 저장할 변수
-                final String[] selectedRadioText = {null};
 
                 dialog.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        // 선택된 라디오 버튼의 인덱스 찾기
-                        int radioButtonID = group.getCheckedRadioButtonId();
-                        View radioButton = group.findViewById(radioButtonID);
-
-                        // 선택된 라디오 버튼의 텍스트 가져오기
-                        selectedRadioText[0] = ((RadioButton) radioButton).getText().toString();
+                        RadioButton radioButton = dialog.findViewById(checkedId);
+                        if (radioButton != null) {
+                            selectedGame = radioButton.getText().toString();
+                        }
                     }
                 });
 
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (selectedRadioText[0] != null) {
-                            Toast.makeText(getContext(), selectedRadioText[0], Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
+                        if (selectedGame != null) {
+                            selectGameBtn.setText(selectedGame);
                         }
+                        dialog.dismiss();
                     }
                 });
 
                 dialog.setOnCancelClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        selectedGame = null;
                         dialog.dismiss();
-
                     }
                 });
 
@@ -158,18 +136,17 @@ public class GameLobbyFragment extends Fragment {
         startGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAdminAndStartGame();
+                DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
+                roomRef.child("selectedGame").setValue(selectedGame);
             }
         });
 
         updateAdapter(adapter, roomID);
 
         listView.setAdapter(adapter);
-
-        return rootView;
     }
 
-    private void updateAdapter(GameLobbyUserListAdapter adapter, int roomID) {
+    private void updateAdapter(LobbyUserListAdapter adapter, int roomID) {
         DatabaseReference userListRef = myRef.child("rooms").child(Integer.toString(roomID)).child("userList");
         userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -189,7 +166,7 @@ public class GameLobbyFragment extends Fragment {
         });
     }
 
-    private void getUserDataList(ArrayList<String> UIDs, GameLobbyUserListAdapter adapter) {
+    private void getUserDataList(ArrayList<String> UIDs, LobbyUserListAdapter adapter) {
         adapter.clear();
         for (String uid: UIDs) {
             myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -237,7 +214,7 @@ public class GameLobbyFragment extends Fragment {
 
     private void removeRoomData(int roomID) {
         DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
-        roomRef.removeValue();
+        roomRef.setValue(null);
     }
 
     private void changeRoomAdminID(int roomID) {
@@ -262,30 +239,22 @@ public class GameLobbyFragment extends Fragment {
         });
     }
 
-    private void checkAdminAndStartGame() {
-        DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
-        roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                RoomData roomInfo = snapshot.getValue(RoomData.class);
-                if (roomInfo != null && roomInfo.getRoomAdminID().equals(currentUser.getUid())) {
-                    // 방 관리자이므로 게임을 시작할 수 있음
-                    startGame();
-                } else {
-                    // 방 관리자가 아니므로 Toast를 통해 알림
-                    Toast.makeText(getActivity(), "You are not the admin!", Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void startGame(String str) {
+        Intent intent;
+        Bundle bundle = new Bundle();
+        bundle.putInt("roomID", roomID);
+        bundle.putString("roomName", roomName);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // onCancelled 처리
-            }
-        });
+        if (str.equals("테스트용 1")) {
+            intent = new Intent(getApplicationContext(), GameFirstActivity.class);
+            intent.putExtras(bundle);
+            startActivity(intent);
+        } else if (str.equals("테스트용 2")) {
+            Toast.makeText(getApplicationContext(),"22222", Toast.LENGTH_SHORT).show();
+        } else if (str.equals("테스트용 3")) {
+            Toast.makeText(getApplicationContext(),"33333", Toast.LENGTH_SHORT).show();
+        }
+
+        finish();
     }
-
-    private void startGame() {
-        Toast.makeText(getActivity(), "Game started!", Toast.LENGTH_SHORT).show();
-    }
-
 }

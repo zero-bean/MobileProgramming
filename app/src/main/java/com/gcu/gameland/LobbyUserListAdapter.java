@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import DTO.UserData;
 
-public class GameLobbyUserListAdapter extends BaseAdapter {
+public class LobbyUserListAdapter extends BaseAdapter {
     ArrayList<UserData> items = new ArrayList<UserData>();
     Context context;
 
@@ -40,7 +40,7 @@ public class GameLobbyUserListAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.game_lobby_user_list_item, parent, false);
+            convertView = inflater.inflate(R.layout.lobby_user_list_item, parent, false);
         }
 
         ImageView userImageView = convertView.findViewById(R.id.gameLobbyUserProfileImageView);

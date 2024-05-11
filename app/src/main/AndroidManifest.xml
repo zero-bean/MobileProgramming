@@ -10,18 +10,16 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GameLand"
+        android:theme="@style/Theme.GameLand.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".GameRoomActivity"
+            android:name=".GameFirstActivity"
             android:exported="false" />
         <activity
-            android:name=".GameRoomListActivity"
-            android:exported="false"
-            android:label="@string/title_activity_game_room_list"
-            android:theme="@style/Theme.GameLand.NoActionBar" />
+            android:name=".RoomListActivity"
+            android:exported="false" />
         <activity
-            android:name=".GameLobbyActivity"
+            android:name=".LobbyActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

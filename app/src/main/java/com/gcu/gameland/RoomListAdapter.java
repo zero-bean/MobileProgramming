@@ -4,20 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 
 import DTO.RoomData;
 
-public class GameRoomListAdapter extends BaseAdapter {
+public class RoomListAdapter extends BaseAdapter {
     ArrayList<RoomData> items = new ArrayList<RoomData>();
     Context context;
 
@@ -43,7 +37,7 @@ public class GameRoomListAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.game_room_list_item, parent, false);
+            convertView = inflater.inflate(R.layout.room_list_item, parent, false);
         }
 
         TextView gameRoomInfo = convertView.findViewById(R.id.roomInfoTextView);

@@ -7,11 +7,13 @@ public class RoomData implements Serializable {
     private String roomID;
     private String roomName;
     private String roomAdminID;
+    private String selectedGame;
 
     private ArrayList<String> userList;
 
     public RoomData() {
         userList = new ArrayList<>();
+        selectedGame = null;
     }
     
     public RoomData(String roomID, String roomName, String roomAdminID) {
@@ -19,6 +21,7 @@ public class RoomData implements Serializable {
         this.roomName = roomName;
         this.roomAdminID = roomAdminID;
         userList = new ArrayList<>();
+        selectedGame = null;
     }
 
     public void setRoomID(String roomID) {
@@ -30,6 +33,7 @@ public class RoomData implements Serializable {
     public void setRoomAdminID(String roomAdminID) {
         this.roomAdminID = roomAdminID;
     }
+    public void SetSelectedGame(String selectedGame) { this.selectedGame = selectedGame; }
 
     public String getRoomID() {
         return this.roomID;
@@ -39,7 +43,7 @@ public class RoomData implements Serializable {
     }
     public String getRoomAdminID() { return this.roomAdminID; }
     public ArrayList<String> getUserList() { return this.userList; }
+    public String getSelectedGame() { return this.selectedGame; }
 
     public void addUser(String user) { userList.add(user); }
-    public void deleteUser(String user) { userList.remove(user); }
 }
