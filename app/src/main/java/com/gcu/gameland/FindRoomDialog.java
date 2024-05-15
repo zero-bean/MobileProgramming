@@ -30,10 +30,13 @@ public class FindRoomDialog extends Dialog {
         cancelBtn = findViewById(R.id.findRoomCancleButton);
         confirmBtn = findViewById(R.id.findRoomConfirmButton);
         editText = findViewById(R.id.findRoomEditText);
-    }
 
-    public void setOnCancelClickListener(View.OnClickListener listener) {
-        cancelBtn.setOnClickListener(listener);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
     }
 
     public void setOnConfirmClickListener(View.OnClickListener listener) {

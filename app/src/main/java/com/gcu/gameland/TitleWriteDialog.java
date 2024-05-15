@@ -30,10 +30,13 @@ public class TitleWriteDialog extends Dialog {
         cancelBtn = findViewById(R.id.TWDCancleButton);
         confirmBtn = findViewById(R.id.TWDConfirmButton);
         editText = findViewById(R.id.TWDEditText);
-    }
 
-    public void setOnCancelClickListener(View.OnClickListener listener) {
-        cancelBtn.setOnClickListener(listener);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
     }
 
     public void setOnConfirmClickListener(View.OnClickListener listener) {
