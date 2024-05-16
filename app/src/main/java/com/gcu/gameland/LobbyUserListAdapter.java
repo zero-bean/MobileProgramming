@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
-import DTO.UserData;
+import com.gcu.gameland.DTO.UserData;
 
 public class LobbyUserListAdapter extends BaseAdapter {
     ArrayList<UserData> items = new ArrayList<UserData>();
@@ -40,7 +40,7 @@ public class LobbyUserListAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.lobby_user_list_item, parent, false);
+            convertView = inflater.inflate(R.layout.item_lobby_user_list, parent, false);
         }
 
         ImageView userImageView = convertView.findViewById(R.id.gameLobbyUserProfileImageView);

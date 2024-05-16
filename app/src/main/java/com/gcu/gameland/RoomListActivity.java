@@ -2,18 +2,12 @@ package com.gcu.gameland;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,17 +15,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-import DTO.RoomData;
+import com.gcu.gameland.DTO.RoomData;
 
 public class RoomListActivity extends AppCompatActivity {
-    private final String TAG = "GameRoomActivity";
-    private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+    private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+    private RoomListAdapter adapter;
     private ListView listView;
     private MaterialToolbar toolbar;
 
@@ -39,21 +32,16 @@ public class RoomListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_list);
-
-        listView = findViewById(R.id.gameRoomListView);
-        toolbar = findViewById(R.id.gameRoomTopAppBar);
-
-        RoomListAdapter adapter = new RoomListAdapter();
-        updateRoomList(adapter);
-        listView.setAdapter(adapter);
+        initializeWidgets();
+        createRoomListListener();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RoomData roomData = (RoomData) adapter.getItem(position);
-                updateRoomInfo(roomData);
                 Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                 Bundle bundle = new Bundle();
+                RoomData roomData = (RoomData) adapter.getItem(position);
+                updateTheRoomInfo(roomData);
                 bundle.putInt("roomID", Integer.parseInt(roomData.getRoomID()));
                 bundle.putString("roomName", roomData.getRoomName());
                 intent.putExtras(bundle);
@@ -72,13 +60,24 @@ public class RoomListActivity extends AppCompatActivity {
         });
     }
 
-    private void updateRoomList(RoomListAdapter adapter) {
-        myRef.child("rooms").addListenerForSingleValueEvent(new ValueEventListener() {
+    private void initializeWidgets() {
+        listView = findViewById(R.id.gameRoomListView);
+        toolbar = findViewById(R.id.gameRoomTopAppBar);
+        adapter = new RoomListAdapter();
+        listView.setAdapter(adapter);
+    }
+
+    private void createRoomListListener() {
+        ValueEventListener listener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()) {
+                    return;
+                }
+
                 ArrayList<RoomData> roomDataList = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    RoomData roomData = snapshot.getValue(RoomData.class);
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    RoomData roomData = data.getValue(RoomData.class);
                     roomDataList.add(roomData);
                 }
 
@@ -87,46 +86,19 @@ public class RoomListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // ...
             }
-        });
+        };
+
+        roomsRef.addValueEventListener(listener);
     }
 
-    private void updateRoomInfo(RoomData roomData) {
-        DatabaseReference roomRef = myRef.child("rooms").child(roomData.getRoomID());
-        roomRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                RoomData roomInfo = mutableData.getValue(RoomData.class);
-                if (roomInfo == null) {
-                    return Transaction.success(mutableData);
-                }
+    private void updateTheRoomInfo(RoomData roomData) {
+        String UID = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        roomData.getUserList().add(UID);
 
-                String currentUserUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                if (!roomInfo.getUserList().contains(currentUserUID)) {
-                    roomInfo.getUserList().add(currentUserUID);
-                }
-
-                mutableData.setValue(roomInfo);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot currentData) {
-                if (databaseError != null) {
-                    Log.e(TAG, "트랜잭션 실패", databaseError.toException());
-                } else {
-                    if (committed) {
-                        Log.d(TAG, "룸 정보 업데이트 성공");
-                    } else {
-                        Log.d(TAG, "룸 정보 업데이트 실패: 트랜잭션이 중단됨");
-                    }
-                }
-            }
-        });
+        roomsRef.child(roomData.getRoomID()).setValue(roomData);
     }
 
     @Override

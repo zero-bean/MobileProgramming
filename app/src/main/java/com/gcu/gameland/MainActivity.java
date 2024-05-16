@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.gcu.gameland.Dialog.FindRoomDialog;
+import com.gcu.gameland.Dialog.TitleWriteDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -25,17 +27,15 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 import java.util.ArrayList;
 import java.util.Random;
 
-import DTO.RoomData;
-import DTO.UserData;
+import com.gcu.gameland.DTO.RoomData;
+import com.gcu.gameland.DTO.UserData;
 
 public class MainActivity extends AppCompatActivity {
-    private final String TAG = "MainActivity";
-    private DatabaseReference usersRef;
-    private DatabaseReference roomsRef;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
+    private final DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
+    private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private final FirebaseUser currentUser = mAuth.getCurrentUser();
     private UserData myUserData;
-
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
     private Button createRoomBtn;
@@ -49,12 +49,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initializeWidgets();
-        usersRef = FirebaseDatabase.getInstance().getReference().child("users");
-        roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
 
         createRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override

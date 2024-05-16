@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.gcu.gameland.Dialog.SelectGameDialog;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,8 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import DTO.RoomData;
-import DTO.UserData;
+import com.gcu.gameland.DTO.RoomData;
+import com.gcu.gameland.DTO.UserData;
 
 public class LobbyActivity extends AppCompatActivity {
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();

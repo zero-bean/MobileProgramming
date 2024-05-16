@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import DTO.RoomData;
+import com.gcu.gameland.DTO.RoomData;
 
 public class RoomListAdapter extends BaseAdapter {
     ArrayList<RoomData> items = new ArrayList<RoomData>();
@@ -37,7 +37,7 @@ public class RoomListAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.room_list_item, parent, false);
+            convertView = inflater.inflate(R.layout.item_room_list, parent, false);
         }
 
         TextView gameRoomInfo = convertView.findViewById(R.id.roomInfoTextView);
@@ -49,7 +49,6 @@ public class RoomListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public void addRoomData(RoomData roomData) { items.add(roomData); }
     public void addRoomDataList(ArrayList<RoomData> roomDataList) {
         items.addAll(roomDataList);
         notifyDataSetChanged();

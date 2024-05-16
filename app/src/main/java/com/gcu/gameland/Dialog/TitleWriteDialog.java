@@ -1,4 +1,4 @@
-package com.gcu.gameland;
+package com.gcu.gameland.Dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
+
+import com.gcu.gameland.R;
 
 public class TitleWriteDialog extends Dialog {
 
