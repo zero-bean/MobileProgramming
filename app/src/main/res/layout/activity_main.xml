@@ -85,7 +85,7 @@
         android:id="@+id/profileCircularImageView"
         android:layout_width="172dp"
         android:layout_height="159dp"
-        android:src="@drawable/default_profile"
+        android:src="@drawable/img_profile_default"
         app:civ_border_color="@color/primary_on"
         app:civ_border_width="2dp"
         app:civ_shadow="true"
@@ -136,7 +136,7 @@
         app:layout_constraintStart_toStartOf="@+id/createRoomButton"
         app:layout_constraintTop_toTopOf="@+id/createRoomButton"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/baseline_add_box_24" />
+        app:srcCompat="@drawable/icon_add_box" />
 
     <TextView
         android:id="@+id/createRoomTextView"
@@ -176,7 +176,7 @@
         app:layout_constraintStart_toStartOf="@+id/enterRoomButton"
         app:layout_constraintTop_toTopOf="@+id/enterRoomButton"
         app:layout_constraintVertical_bias="0.176"
-        app:srcCompat="@drawable/baseline_add_to_home_screen_24" />
+        app:srcCompat="@drawable/icom_home" />
 
     <TextView
         android:id="@+id/enterRoomTextView"
@@ -216,7 +216,7 @@
         app:layout_constraintStart_toStartOf="@+id/findRoomButton"
         app:layout_constraintTop_toTopOf="@+id/findRoomButton"
         app:layout_constraintVertical_bias="0.176"
-        app:srcCompat="@drawable/baseline_attribution_24" />
+        app:srcCompat="@drawable/icon_attribution" />
 
     <TextView
         android:id="@+id/findRoomTextView"

@@ -5,16 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import DTO.RoomData;
 
 public class GameFirstActivity extends AppCompatActivity {
     private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();

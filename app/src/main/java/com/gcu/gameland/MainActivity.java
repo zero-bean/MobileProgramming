@@ -4,22 +4,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.gcu.gameland.Dialog.FindRoomDialog;
+import com.gcu.gameland.Dialog.TitleWriteDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,18 +27,15 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 import java.util.ArrayList;
 import java.util.Random;
 
-import DTO.RoomData;
-import DTO.UserData;
+import com.gcu.gameland.DTO.RoomData;
+import com.gcu.gameland.DTO.UserData;
 
 public class MainActivity extends AppCompatActivity {
-    private final String TAG = "MainActivity";
-    private final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private final DatabaseReference myRef = database.getReference();
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-
+    private final DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
+    private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private final FirebaseUser currentUser = mAuth.getCurrentUser();
     private UserData myUserData;
-
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
     private Button createRoomBtn;
@@ -57,20 +49,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        profileImageView = findViewById(R.id.profileCircularImageView);
-        profileNameTextView = findViewById(R.id.profileNameTextView);
-        createRoomBtn = findViewById(R.id.createRoomButton);
-        enterRoomBtn = findViewById(R.id.enterRoomButton);
-        findRoomBtn = findViewById(R.id.findRoomButton);
-        changeProfileBtn = findViewById(R.id.changeProfileButton);
-        logoutBtn = findViewById(R.id.logoutButton);
-        enterStoreBtn = findViewById(R.id.enterStoreButton);
-
-        // [START initialize_auth]
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
+        initializeWidgets();
 
         createRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,40 +61,17 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Random random = new Random();
-                        DatabaseReference roomsRef = myRef.child("rooms");
-
-                        int roomNumber;
-                        RoomData roomInfo;
-
-                        do {
-                            roomNumber = random.nextInt(10000);
-                        } while (roomExists(roomsRef, roomNumber));
-
-                        String roomID = Integer.toString(roomNumber);
                         String roomName = dialog.getEnteredText();
-                        String roomAdminID = currentUser.getUid();
-                        roomInfo = new RoomData(roomID, roomName, roomAdminID);
-                        roomInfo.addUser(roomAdminID);
-                        roomsRef.child(roomID).setValue(roomInfo);
+                        int roomNumber = generateRoomId();
+                        createLobby(roomName, roomNumber);
 
-                        dialog.dismiss();
-
+                        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putInt("roomID", roomNumber);
                         bundle.putString("roomName", roomName);
-
-                        Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         intent.putExtras(bundle);
                         startActivity(intent);
                         finish();
-                    }
-                });
-
-                dialog.setOnCancelClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
                     }
                 });
             }
@@ -141,44 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         String roomID = dialog.getEnteredText();
-                        DatabaseReference roomsRef = myRef.child("rooms").child(roomID);
-
-                        roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.exists()) {
-                                    dialog.dismiss();
-
-                                    RoomData roomInfo = snapshot.getValue(RoomData.class);
-                                    ArrayList<String> userList = roomInfo.getUserList();
-                                    userList.add(currentUser.getUid());
-                                    roomsRef.child("userList").setValue(userList);
-
-                                    Bundle bundle = new Bundle();
-                                    bundle.putInt("roomID", Integer.parseInt(roomID));
-                                    bundle.putString("roomName", roomInfo.getRoomName());
-
-                                    Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
-                                    intent.putExtras(bundle);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "해당 방이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                // ...
-                            }
-                        });
-                    }
-                });
-
-                dialog.setOnCancelClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
+                        enterLobby(dialog, roomID);
                     }
                 });
             }
@@ -196,73 +115,99 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // [START on_start_check_user]
     @Override
     public void onStart() {
         super.onStart();
-        currentUser = mAuth.getCurrentUser();
-        String userUID = currentUser.getUid();
-        DatabaseReference userRef = myRef.child("users").child(userUID);
+        initializeProfile();
+    }
 
+    private void initializeWidgets() {
+        profileImageView = findViewById(R.id.profileCircularImageView);
+        profileNameTextView = findViewById(R.id.profileNameTextView);
+        createRoomBtn = findViewById(R.id.createRoomButton);
+        enterRoomBtn = findViewById(R.id.enterRoomButton);
+        findRoomBtn = findViewById(R.id.findRoomButton);
+        changeProfileBtn = findViewById(R.id.changeProfileButton);
+        logoutBtn = findViewById(R.id.logoutButton);
+        enterStoreBtn = findViewById(R.id.enterStoreButton);
+    }
+
+    private void initializeProfile() {
+        DatabaseReference userRef = usersRef.child(currentUser.getUid());
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Log.d(TAG, "FIREBASE 유저 데이터 갱신 시작");
-                    UserData userData = dataSnapshot.getValue(UserData.class);
-                    updateUserProfile(userData);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    String UID = currentUser.getUid();
+                    String name = currentUser.getDisplayName();
+                    String image = currentUser.getPhotoUrl() != null ? currentUser.getPhotoUrl().toString() : null;
+                    myUserData = new UserData(UID, name, image);
+
+                    userRef.setValue(myUserData);
                 } else {
-                    Log.d(TAG, "FIREBASE 유저 데이터 초기화 시작");
-                    initializeUserData();
-                    updateUserProfile(myUserData);
+                    myUserData = snapshot.getValue(UserData.class);
                 }
+
+                updateProfile(myUserData);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "FIREBASE 유저 데이터 갱신 실패: ", databaseError.toException());
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void updateProfile(UserData userData) {
+        profileNameTextView.setText(userData.getNickName());
+
+        String photoUrl = userData.getImageURL();
+        if (photoUrl != null) {
+            Glide.with(this).load(photoUrl).into(profileImageView);
+        }
+    }
+
+    private void createLobby(String roomName, int roomNumber) {
+        String roomID = Integer.toString(roomNumber);
+        String roomAdminID = currentUser.getUid();
+        RoomData roomData = new RoomData(roomID, roomName, roomAdminID);
+        roomData.addUser(roomAdminID);
+        roomsRef.child(roomID).setValue(roomData);
+    }
+
+    private void enterLobby(FindRoomDialog dialog, String roomId) {
+        roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()) {
+                    Toast.makeText(getApplicationContext(), "해당 방이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    return;
+                }
+
+                RoomData roomInfo = snapshot.getValue(RoomData.class);
+                ArrayList<String> userList = roomInfo.getUserList();
+                userList.add(currentUser.getUid());
+                roomsRef.child("userList").setValue(userList);
+
+                Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("roomID", Integer.parseInt(roomId));
+                bundle.putString("roomName", roomInfo.getRoomName());
+                intent.putExtras(bundle);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // ...
             }
         });
     }
 
-    // [END on_start_check_user]
-
-    private void initializeUserData() {
-        String userUID = currentUser.getUid();
-        String displayName = currentUser.getDisplayName();
-        String photoUrl = currentUser.getPhotoUrl() != null ? currentUser.getPhotoUrl().toString() : null;
-        myUserData = new UserData(userUID, displayName, photoUrl);
-
-        DatabaseReference userRef = myRef.child("users").child(userUID);
-        userRef.setValue(myUserData)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "유저 정보 초기화를 성공하였습니다!");
-                        } else {
-                            Log.w(TAG, "유저 정보 초기화를 실패하였습니다: ", task.getException());
-                        }
-                    }
-                });
-    }
-
-    private void updateUserProfile(UserData userData) {
-        myUserData = userData;
-
-        Log.d(TAG, "유저 이름 갱신 성공, name:" + myUserData.getNickName());
-        profileNameTextView.setText(myUserData.getNickName());
-
-        String photoUrl = myUserData.getImageURL();
-        if (photoUrl != null) {
-            Log.d(TAG, "유저 프로필 이미지 갱신 성공, 이미지 URL:" + photoUrl);
-            Glide.with(this).load(photoUrl).into(profileImageView);
-        } else {
-            Log.d(TAG, "유저 프로필 이미지 갱신 실패, 이미지 URL: NULL");
-        }
-    }
-
-    private boolean roomExists(DatabaseReference roomsRef, int roomNumber) {
+    private boolean roomExists(int roomNumber) {
         final boolean[] exists = {false};
         roomsRef.child(Integer.toString(roomNumber)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -276,5 +221,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         return exists[0];
+    }
+
+    private int generateRoomId() {
+        Random random = new Random();
+        int roomNumber;
+
+        do {
+            roomNumber = random.nextInt(10000);
+        } while (roomExists(roomNumber));
+
+        return roomNumber;
     }
 }
