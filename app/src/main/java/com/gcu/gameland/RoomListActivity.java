@@ -9,6 +9,7 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.gcu.gameland.DTO.UserData;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -27,11 +28,13 @@ public class RoomListActivity extends AppCompatActivity {
     private RoomListAdapter adapter;
     private ListView listView;
     private MaterialToolbar toolbar;
+    private UserData myUserData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_list);
+        getBundleData();
         initializeWidgets();
         createRoomListListener();
 
@@ -42,8 +45,8 @@ public class RoomListActivity extends AppCompatActivity {
                 Bundle bundle = new Bundle();
                 RoomData roomData = (RoomData) adapter.getItem(position);
                 updateTheRoomInfo(roomData);
-                bundle.putInt("roomID", Integer.parseInt(roomData.getRoomID()));
-                bundle.putString("roomName", roomData.getRoomName());
+                bundle.putSerializable("myRoomData", roomData);
+                bundle.putSerializable("myUserData", myUserData);
                 intent.putExtras(bundle);
                 startActivity(intent);
                 finish();
@@ -58,6 +61,11 @@ public class RoomListActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void getBundleData() {
+        Intent intent = getIntent();
+        myUserData = (UserData) intent.getSerializableExtra("myUserData");
     }
 
     private void initializeWidgets() {
@@ -95,9 +103,7 @@ public class RoomListActivity extends AppCompatActivity {
     }
 
     private void updateTheRoomInfo(RoomData roomData) {
-        String UID = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
-        roomData.getUserList().add(UID);
-
+        roomData.getUserList().add(myUserData);
         roomsRef.child(roomData.getRoomID()).setValue(roomData);
     }
 

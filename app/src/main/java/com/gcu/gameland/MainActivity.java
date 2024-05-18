@@ -25,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.gcu.gameland.DTO.RoomData;
@@ -63,12 +64,12 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         String roomName = dialog.getEnteredText();
                         int roomNumber = generateRoomId();
-                        createLobby(roomName, roomNumber);
+                        RoomData myRoomData = createLobby(roomName, roomNumber);
 
                         Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         Bundle bundle = new Bundle();
-                        bundle.putInt("roomID", roomNumber);
-                        bundle.putString("roomName", roomName);
+                        bundle.putSerializable("myRoomData", myRoomData);
+                        bundle.putSerializable("myUserData", myUserData);
                         intent.putExtras(bundle);
                         startActivity(intent);
                         finish();
@@ -81,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), RoomListActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("myUserData", myUserData);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 finish();
             }
@@ -168,16 +172,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void createLobby(String roomName, int roomNumber) {
+    private RoomData createLobby(String roomName, int roomNumber) {
         String roomID = Integer.toString(roomNumber);
         String roomAdminID = currentUser.getUid();
         RoomData roomData = new RoomData(roomID, roomName, roomAdminID);
-        roomData.addUser(roomAdminID);
+        roomData.addUser(myUserData);
         roomsRef.child(roomID).setValue(roomData);
+
+        return roomData;
     }
 
     private void enterLobby(FindRoomDialog dialog, String roomId) {
-        roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        roomsRef.child(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.exists()) {
@@ -186,15 +192,15 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                RoomData roomInfo = snapshot.getValue(RoomData.class);
-                ArrayList<String> userList = roomInfo.getUserList();
-                userList.add(currentUser.getUid());
-                roomsRef.child("userList").setValue(userList);
+                RoomData roomData = snapshot.getValue(RoomData.class);
+                List<UserData> userList = roomData.getUserList();
+                userList.add(myUserData);
+                roomsRef.child(roomId).child("userList").setValue(userList);
 
                 Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt("roomID", Integer.parseInt(roomId));
-                bundle.putString("roomName", roomInfo.getRoomName());
+                bundle.putSerializable("myRoomData", roomData);
+                bundle.putSerializable("myUserData", myUserData);
                 intent.putExtras(bundle);
                 startActivity(intent);
                 finish();
