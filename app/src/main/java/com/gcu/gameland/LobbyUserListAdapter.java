@@ -11,11 +11,12 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.gcu.gameland.DTO.UserData;
 
 public class LobbyUserListAdapter extends BaseAdapter {
-    ArrayList<UserData> items = new ArrayList<UserData>();
+    List<UserData> items = new ArrayList<UserData>();
     Context context;
 
     @Override
@@ -54,13 +55,13 @@ public class LobbyUserListAdapter extends BaseAdapter {
     }
 
     public void addUserData(UserData userData) {
-        if (!isUserExists(userData)) {
-            items.add(userData);
-        }
+        items.add(userData);
     }
 
-    public boolean isUserExists(UserData userData) {
-        return items.contains(userData);
+    public void addUserData(List<UserData> list) {
+        clear();
+        items.addAll(list);
+        notifyDataSetChanged();
     }
 
     public void clear() {items.clear();}

@@ -27,71 +27,37 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.gcu.gameland.DTO.RoomData;
 import com.gcu.gameland.DTO.UserData;
 
 public class LobbyActivity extends AppCompatActivity {
-    private final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
-    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    private ValueEventListener userListListener;
-    private int roomID;
-    private String roomName;
+    private DatabaseReference roomRef;
     private ListView listView;
     private LobbyUserListAdapter adapter;
     private MaterialToolbar toolbar;
     private Button selectGameBtn;
     private Button startGameBtn;
-
-    private String selectedGame;
+    private RoomData myRoomData;
+    private UserData myUserData;
+    private String gameName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
+        initializeFirebase();
+        initializeWidgets();
+        createUserCountListener();
+        createGameChangeListener();
 
-        selectedGame = null;
-
-        Intent intent = getIntent();
-        roomID = intent.getIntExtra("roomID", 0);
-        roomName = intent.getStringExtra("roomName");
-
-        adapter = new LobbyUserListAdapter();
-
-        userListListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.exists())
-                    return;
-
-                updateAdapter(adapter, roomID);
-
-                RoomData roomInfo = snapshot.getValue(RoomData.class);
-                if(roomInfo.getSelectedGame() != null) {
-                    startGame(roomInfo.getSelectedGame());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                //
-            }
-        };
-
-        DatabaseReference ref = myRef.child("rooms").child(Integer.toString(roomID));
-        ref.addValueEventListener(userListListener);
-
-        listView = findViewById(R.id.userListView);
-        selectGameBtn = findViewById(R.id.selectGameButton);
-        startGameBtn = findViewById(R.id.startGameButton);
-        toolbar = findViewById(R.id.GameLobbyTopAppBar);
-        toolbar.setTitle(roomID + " / " + roomName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LobbyActivity.this, MainActivity.class);
+                removeUser();
                 startActivity(intent);
-                removeUser(roomID);
                 finish();
             }
         });
@@ -103,30 +69,11 @@ public class LobbyActivity extends AppCompatActivity {
                 dialog.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-                dialog.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        RadioButton radioButton = dialog.findViewById(checkedId);
-                        if (radioButton != null) {
-                            selectedGame = radioButton.getText().toString();
-                        }
-                    }
-                });
-
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (selectedGame != null) {
-                            selectGameBtn.setText(selectedGame);
-                        }
-                        dialog.dismiss();
-                    }
-                });
-
-                dialog.setOnCancelClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        selectedGame = null;
+                        gameName = dialog.getSelectedRadioButtonText();
+                        selectGameBtn.setText(gameName);
                         dialog.dismiss();
                     }
                 });
@@ -137,73 +84,94 @@ public class LobbyActivity extends AppCompatActivity {
         startGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
-                roomRef.child("selectedGame").setValue(selectedGame);
+                if (gameName != null) {
+                    roomRef.child("selectedGame").setValue(gameName);
+                }
             }
         });
 
-        updateAdapter(adapter, roomID);
+    }
 
+    private void initializeFirebase() {
+        Intent intent = getIntent();
+        myRoomData = (RoomData) intent.getSerializableExtra("myRoomData");
+        myUserData = (UserData) intent.getSerializableExtra("myUserData");
+
+        roomRef = FirebaseDatabase.getInstance().getReference()
+                .child("rooms").child(myRoomData.getRoomID());
+    }
+
+    private void initializeWidgets() {
+        listView = findViewById(R.id.userListView);
+        selectGameBtn = findViewById(R.id.selectGameButton);
+        startGameBtn = findViewById(R.id.startGameButton);
+        toolbar = findViewById(R.id.GameLobbyTopAppBar);
+        adapter = new LobbyUserListAdapter();
         listView.setAdapter(adapter);
+        toolbar.setTitle(myRoomData.getRoomID() + " / " + myRoomData.getRoomName());
     }
 
-    private void updateAdapter(LobbyUserListAdapter adapter, int roomID) {
-        DatabaseReference userListRef = myRef.child("rooms").child(Integer.toString(roomID)).child("userList");
-        userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void createUserCountListener() {
+        DatabaseReference userCountRef = roomRef.child("userList");
+        ValueEventListener userCountListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // 일반적인 형식인 ArrayList<String>을 역직렬화하기 위해 GenericTypeIndicator 사용
-                GenericTypeIndicator<ArrayList<String>> typeIndicator = new GenericTypeIndicator<ArrayList<String>>() {};
-                ArrayList<String> UIDs = snapshot.getValue(typeIndicator);
-                if (UIDs != null) {
-                    getUserDataList(UIDs, adapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // onCancelled 처리
-            }
-        });
-    }
-
-    private void getUserDataList(ArrayList<String> UIDs, LobbyUserListAdapter adapter) {
-        adapter.clear();
-        for (String uid: UIDs) {
-            myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    UserData user = snapshot.getValue(UserData.class);
-                    if (user != null && !adapter.isUserExists(user)) {
-                        adapter.addUserData(user);
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.d("getUserDataList", "loadPost:onCancelled", error.toException());
-                }
-            });
-        }
-    }
-
-    private void removeUser(int roomID) {
-        String userUid = currentUser.getUid();
-        DatabaseReference userListRef = myRef.child("rooms").child(Integer.toString(roomID)).child("userList");
-
-        userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                ArrayList<String> list = snapshot.getValue(new GenericTypeIndicator<ArrayList<String>>() {});
-                if (list == null || list.size() <= 1) {
-                    removeRoomData(roomID);
+                if (!snapshot.exists()) {
                     return;
                 }
 
-                list.remove(userUid);
+                List<UserData> userList = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
+                if (userList != null) {
+                    adapter.addUserData(userList);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // ...
+            }
+        };
+
+        userCountRef.addValueEventListener(userCountListener);
+    }
+
+    private void createGameChangeListener() {
+        DatabaseReference selectedGameRef = roomRef.child("selectedGame");
+        ValueEventListener gameChangeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    return;
+                }
+
+                String selectedGameName = snapshot.getValue(String.class);
+                startGame(selectedGameName);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // ...
+            }
+        };
+
+        selectedGameRef.addValueEventListener(gameChangeListener);
+    }
+
+    private void removeUser() {
+        DatabaseReference userListRef = roomRef.child("userList");
+
+        userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<UserData> list = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
+                if (list == null || list.size() <= 1) {
+                    roomRef.removeValue();
+                    return;
+                }
+
+                list.remove(myUserData);
                 userListRef.setValue(list);
-                changeRoomAdminID(roomID);
+                changeRoomAdminID();
             }
 
             @Override
@@ -213,22 +181,14 @@ public class LobbyActivity extends AppCompatActivity {
         });
     }
 
-    private void removeRoomData(int roomID) {
-        DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
-        roomRef.setValue(null);
-    }
-
-    private void changeRoomAdminID(int roomID) {
-        DatabaseReference roomRef = myRef.child("rooms").child(Integer.toString(roomID));
+    private void changeRoomAdminID() {
         roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 RoomData roomInfo = snapshot.getValue(RoomData.class);
                 if (roomInfo != null && roomInfo.getUserList() != null) {
-                    String newRoomAdminID = roomInfo.getUserList().get(0);
-
+                    String newRoomAdminID = roomInfo.getUserList().get(0).getUID();
                     roomInfo.setRoomAdminID(newRoomAdminID);
-
                     roomRef.setValue(roomInfo);
                 }
             }
@@ -243,8 +203,8 @@ public class LobbyActivity extends AppCompatActivity {
     private void startGame(String str) {
         Intent intent;
         Bundle bundle = new Bundle();
-        bundle.putInt("roomID", roomID);
-        bundle.putString("roomName", roomName);
+        bundle.putSerializable("myRoomData", myRoomData);
+        bundle.putSerializable("myUserData", myUserData);
 
         if (str.equals("테스트용 1")) {
             intent = new Intent(getApplicationContext(), GameFirstActivity.class);
@@ -254,6 +214,8 @@ public class LobbyActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"22222", Toast.LENGTH_SHORT).show();
         } else if (str.equals("테스트용 3")) {
             Toast.makeText(getApplicationContext(),"33333", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(),"Null", Toast.LENGTH_SHORT).show();
         }
 
         finish();

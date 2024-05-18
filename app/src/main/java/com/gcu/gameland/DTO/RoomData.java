@@ -2,6 +2,7 @@ package com.gcu.gameland.DTO;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RoomData implements Serializable {
     private String roomID;
@@ -9,10 +10,10 @@ public class RoomData implements Serializable {
     private String roomAdminID;
     private String selectedGame;
 
-    private ArrayList<String> userList;
+    private List<UserData> userList;
 
     public RoomData() {
-        userList = new ArrayList<>();
+        userList = new ArrayList<UserData>();
         selectedGame = null;
     }
     
@@ -42,8 +43,8 @@ public class RoomData implements Serializable {
         return this.roomName;
     }
     public String getRoomAdminID() { return this.roomAdminID; }
-    public ArrayList<String> getUserList() { return this.userList; }
+    public List<UserData> getUserList() { return this.userList; }
     public String getSelectedGame() { return this.selectedGame; }
 
-    public void addUser(String user) { userList.add(user); }
+    public void addUser(UserData user) { userList.add(user); }
 }
