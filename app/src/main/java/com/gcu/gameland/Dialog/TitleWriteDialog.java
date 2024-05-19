@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 
 import com.gcu.gameland.R;
 
+import java.util.Objects;
+
 public class TitleWriteDialog extends Dialog {
 
     private Button cancelBtn;
@@ -19,6 +21,7 @@ public class TitleWriteDialog extends Dialog {
 
     public TitleWriteDialog(@NonNull Context context) {
         super(context);
+        Objects.requireNonNull(getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
     }
 
     @Override

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.SelectGameDialog;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +37,7 @@ public class LobbyActivity extends AppCompatActivity {
     private DatabaseReference roomRef;
     private ListView listView;
     private LobbyUserListAdapter adapter;
+    private ProgressDialog progressDialog;
     private MaterialToolbar toolbar;
     private Button selectGameBtn;
     private Button startGameBtn;
@@ -67,7 +69,6 @@ public class LobbyActivity extends AppCompatActivity {
             public void onClick(View v) {
                 SelectGameDialog dialog = new SelectGameDialog(LobbyActivity.this);
                 dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
@@ -102,6 +103,7 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void initializeWidgets() {
+        progressDialog = new ProgressDialog(LobbyActivity.this);
         listView = findViewById(R.id.userListView);
         selectGameBtn = findViewById(R.id.selectGameButton);
         startGameBtn = findViewById(R.id.startGameButton);
@@ -112,6 +114,7 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void createUserCountListener() {
+        progressDialog.show();
         DatabaseReference userCountRef = roomRef.child("userList");
         ValueEventListener userCountListener = new ValueEventListener() {
             @Override
@@ -124,11 +127,12 @@ public class LobbyActivity extends AppCompatActivity {
                 if (userList != null) {
                     adapter.addUserData(userList);
                 }
+                progressDialog.hide();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // ...
+                progressDialog.hide();
             }
         };
 
@@ -136,6 +140,8 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void createGameChangeListener() {
+        progressDialog.show();
+
         DatabaseReference selectedGameRef = roomRef.child("selectedGame");
         ValueEventListener gameChangeListener = new ValueEventListener() {
             @Override
@@ -145,12 +151,15 @@ public class LobbyActivity extends AppCompatActivity {
                 }
 
                 String selectedGameName = snapshot.getValue(String.class);
-                startGame(selectedGameName);
+                if (selectedGameName != null) {
+                    startGame(selectedGameName);
+                }
+                progressDialog.hide();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // ...
+                progressDialog.hide();
             }
         };
 
