@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.gcu.gameland.Dialog.FindRoomDialog;
+import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.TitleWriteDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,7 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private final FirebaseUser currentUser = mAuth.getCurrentUser();
+    private ProgressDialog progressDialog;
     private UserData myUserData;
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TitleWriteDialog dialog = new TitleWriteDialog(MainActivity.this);
                 dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 FindRoomDialog dialog = new FindRoomDialog(MainActivity.this);
                 dialog.show();
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
@@ -122,10 +121,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        progressDialog.show();
         initializeProfile();
     }
 
     private void initializeWidgets() {
+        progressDialog = new ProgressDialog(MainActivity.this);
         profileImageView = findViewById(R.id.profileCircularImageView);
         profileNameTextView = findViewById(R.id.profileNameTextView);
         createRoomBtn = findViewById(R.id.createRoomButton);
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                progressDialog.hide();
             }
         });
 
@@ -170,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
         if (photoUrl != null) {
             Glide.with(this).load(photoUrl).into(profileImageView);
         }
+
+        progressDialog.hide();
     }
 
     private RoomData createLobby(String roomName, int roomNumber) {

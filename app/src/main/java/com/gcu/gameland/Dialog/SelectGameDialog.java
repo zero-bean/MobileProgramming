@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 
 import com.gcu.gameland.R;
 
+import java.util.Objects;
+
 public class SelectGameDialog extends Dialog {
     private RadioGroup radioGroup;
     private RadioButton radioButton[];
@@ -22,6 +24,7 @@ public class SelectGameDialog extends Dialog {
 
     public SelectGameDialog(@NonNull Context context) {
         super(context);
+        Objects.requireNonNull(getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
     }
 
     @Override

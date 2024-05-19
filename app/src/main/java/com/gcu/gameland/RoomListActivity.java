@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gcu.gameland.DTO.UserData;
+import com.gcu.gameland.Dialog.ProgressDialog;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,7 @@ import com.gcu.gameland.DTO.RoomData;
 
 public class RoomListActivity extends AppCompatActivity {
     private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+    private ProgressDialog progressDialog;
     private RoomListAdapter adapter;
     private ListView listView;
     private MaterialToolbar toolbar;
@@ -69,6 +71,7 @@ public class RoomListActivity extends AppCompatActivity {
     }
 
     private void initializeWidgets() {
+        progressDialog = new ProgressDialog(RoomListActivity.this);
         listView = findViewById(R.id.gameRoomListView);
         toolbar = findViewById(R.id.gameRoomTopAppBar);
         adapter = new RoomListAdapter();
@@ -76,6 +79,8 @@ public class RoomListActivity extends AppCompatActivity {
     }
 
     private void createRoomListListener() {
+        progressDialog.show();
+
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -88,14 +93,14 @@ public class RoomListActivity extends AppCompatActivity {
                     RoomData roomData = data.getValue(RoomData.class);
                     roomDataList.add(roomData);
                 }
-
                 adapter.items.clear();
                 adapter.addRoomDataList(roomDataList);
+                progressDialog.hide();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // ...
+                progressDialog.hide();
             }
         };
 
