@@ -120,14 +120,15 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
+                    progressDialog.hide();
                     return;
                 }
 
                 List<UserData> userList = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
                 if (userList != null) {
                     adapter.addUserData(userList);
+                    progressDialog.hide();
                 }
-                progressDialog.hide();
             }
 
             @Override
@@ -147,14 +148,15 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
+                    progressDialog.hide();
                     return;
                 }
 
                 String selectedGameName = snapshot.getValue(String.class);
                 if (selectedGameName != null) {
                     startGame(selectedGameName);
+                    progressDialog.hide();
                 }
-                progressDialog.hide();
             }
 
             @Override
@@ -210,6 +212,10 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private void startGame(String str) {
+        if (!isAdmin()) {
+            return;
+        }
+
         Intent intent;
         Bundle bundle = new Bundle();
         bundle.putSerializable("myRoomData", myRoomData);
@@ -227,6 +233,35 @@ public class LobbyActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Null", Toast.LENGTH_SHORT).show();
         }
 
+        finish();
+    }
+
+    private boolean isAdmin() {
+        final boolean[] exists = {false};
+        roomRef.child("roomAdminID").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String adminId = dataSnapshot.getValue(String.class);
+                if (myUserData.getUID().equals(adminId)) {
+                    exists[0] = true;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // ...
+            }
+        });
+
+        return exists[0];
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        removeUser();
         finish();
     }
 }

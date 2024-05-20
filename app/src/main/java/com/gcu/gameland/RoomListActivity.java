@@ -85,6 +85,7 @@ public class RoomListActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.exists()) {
+                    progressDialog.hide();
                     return;
                 }
 
