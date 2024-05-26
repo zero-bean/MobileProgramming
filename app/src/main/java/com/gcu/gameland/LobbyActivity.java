@@ -175,7 +175,7 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<UserData> list = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
-                if (list == null || list.size() <= 1) {
+                if (list == null) {
                     roomRef.removeValue();
                     return;
                 }
