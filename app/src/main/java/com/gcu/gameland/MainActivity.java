@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private Button findRoomBtn;
     private Button changeProfileBtn;
     private Button logoutBtn;
-    private Button enterStoreBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
         findRoomBtn = findViewById(R.id.findRoomButton);
         changeProfileBtn = findViewById(R.id.changeProfileButton);
         logoutBtn = findViewById(R.id.logoutButton);
-        enterStoreBtn = findViewById(R.id.enterStoreButton);
     }
 
     private void initializeProfile() {
