@@ -6,7 +6,7 @@
     android:id="@+id/selectGameDialog"
     android:layout_width="312dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/rectangle_bottom_button"
+    android:background="@drawable/rectangle_button_container_on"
     android:layout_gravity="center"
     android:orientation="vertical">
 
@@ -66,7 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/rectangle_bottom_button"
+            android:background="@drawable/rectangle_button_container_on"
             android:backgroundTint="@color/primary_container"
             android:text="확인"
             android:textColor="@color/primary_container_on"
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/rectangle_bottom_button"
+            android:background="@drawable/rectangle_button_container_on"
             android:backgroundTint="#f70000"
             android:text="취소"
             android:textColor="@color/white"

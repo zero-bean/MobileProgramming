@@ -24,7 +24,7 @@
         android:id="@+id/signInWithGoogle"
         android:layout_width="300dp"
         android:layout_height="40dp"
-        android:background="@drawable/rectanlge"
+        android:background="@drawable/rectangle_login_google"
         android:gravity="center"
         android:paddingRight="8dp"
         android:text="Sign in with Google"
