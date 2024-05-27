@@ -34,7 +34,8 @@ public class RoomData implements Serializable {
     public void setRoomAdminID(String roomAdminID) {
         this.roomAdminID = roomAdminID;
     }
-    public void SetSelectedGame(String selectedGame) { this.selectedGame = selectedGame; }
+    public void setSelectedGame(String selectedGame) { this.selectedGame = selectedGame; }
+    public void setUserList(List<UserData> userList) { this.userList = userList; }
 
     public String getRoomID() {
         return this.roomID;

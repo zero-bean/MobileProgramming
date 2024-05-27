@@ -1,15 +1,10 @@
 package com.gcu.gameland;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,7 +14,6 @@ import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.SelectGameDialog;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,7 +21,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.gcu.gameland.DTO.RoomData;
@@ -44,6 +37,7 @@ public class LobbyActivity extends AppCompatActivity {
     private RoomData myRoomData;
     private UserData myUserData;
     private String gameName;
+    private boolean isRightNavigated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +45,8 @@ public class LobbyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_lobby);
         initializeFirebase();
         initializeWidgets();
-        createUserCountListener();
+        createUserListListener();
+        createAdminListener();
         createGameChangeListener();
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -73,8 +68,10 @@ public class LobbyActivity extends AppCompatActivity {
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        gameName = dialog.getSelectedRadioButtonText();
-                        selectGameBtn.setText(gameName);
+                        if (isAdmin()) {
+                            gameName = dialog.getSelectedRadioButtonText();
+                            selectGameBtn.setText(gameName);
+                        }
                         dialog.dismiss();
                     }
                 });
@@ -85,8 +82,9 @@ public class LobbyActivity extends AppCompatActivity {
         startGameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (gameName != null) {
-                    roomRef.child("selectedGame").setValue(gameName);
+                if (isAdmin() && gameName != null) {
+                    DatabaseReference gameRef = roomRef.child("selectedGame");
+                    gameRef.setValue(gameName);
                 }
             }
         });
@@ -113,10 +111,10 @@ public class LobbyActivity extends AppCompatActivity {
         toolbar.setTitle(myRoomData.getRoomID() + " / " + myRoomData.getRoomName());
     }
 
-    private void createUserCountListener() {
+    private void createUserListListener() {
         progressDialog.show();
-        DatabaseReference userCountRef = roomRef.child("userList");
-        ValueEventListener userCountListener = new ValueEventListener() {
+        DatabaseReference userListRef = roomRef.child("userList");
+        ValueEventListener userListListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
@@ -125,10 +123,9 @@ public class LobbyActivity extends AppCompatActivity {
                 }
 
                 List<UserData> userList = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
-                if (userList != null) {
-                    adapter.addUserData(userList);
-                    progressDialog.hide();
-                }
+                myRoomData.setUserList(userList);
+                adapter.addUserData(userList);
+                progressDialog.hide();
             }
 
             @Override
@@ -137,7 +134,32 @@ public class LobbyActivity extends AppCompatActivity {
             }
         };
 
-        userCountRef.addValueEventListener(userCountListener);
+        userListRef.addValueEventListener(userListListener);
+    }
+
+    private void createAdminListener() {
+        progressDialog.show();
+        DatabaseReference adminRef = roomRef.child("roomAdminID");
+        ValueEventListener adminListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    progressDialog.hide();
+                    return;
+                }
+
+                String adminId = snapshot.getValue(String.class);
+                myRoomData.setRoomAdminID(adminId);
+                progressDialog.hide();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.hide();
+            }
+        };
+
+        adminRef.addValueEventListener(adminListener);
     }
 
     private void createGameChangeListener() {
@@ -153,10 +175,12 @@ public class LobbyActivity extends AppCompatActivity {
                 }
 
                 String selectedGameName = snapshot.getValue(String.class);
-                if (selectedGameName != null) {
+                myRoomData.setSelectedGame(selectedGameName);
+                if (isUserInRoom()) {
                     startGame(selectedGameName);
-                    progressDialog.hide();
                 }
+                progressDialog.hide();
+
             }
 
             @Override
@@ -170,64 +194,36 @@ public class LobbyActivity extends AppCompatActivity {
 
     private void removeUser() {
         DatabaseReference userListRef = roomRef.child("userList");
-
-        userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<UserData> list = snapshot.getValue(new GenericTypeIndicator<List<UserData>>() {});
-                if (list == null) {
-                    roomRef.removeValue();
-                    return;
-                }
-
-                list.remove(myUserData);
-                userListRef.setValue(list);
-                changeRoomAdminID();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // onCancelled 처리
-            }
-        });
+        List<UserData> userDataList = myRoomData.getUserList();
+        userDataList.remove(myUserData);
+        if (userDataList.isEmpty()) {
+            roomRef.removeValue();
+        } else {
+            String newAdminID = userDataList.get(0).getUID();
+            changeRoomAdmin(newAdminID);
+            userListRef.setValue(userDataList);
+        }
     }
 
-    private void changeRoomAdminID() {
-        roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                RoomData roomInfo = snapshot.getValue(RoomData.class);
-                if (roomInfo != null && roomInfo.getUserList() != null) {
-                    String newRoomAdminID = roomInfo.getUserList().get(0).getUID();
-                    roomInfo.setRoomAdminID(newRoomAdminID);
-                    roomRef.setValue(roomInfo);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // onCancelled 처리
-            }
-        });
+    private void changeRoomAdmin(String userUid) {
+        DatabaseReference adminRef = roomRef.child("roomAdminID");
+        adminRef.setValue(userUid);
     }
 
     private void startGame(String str) {
-        if (!isAdmin()) {
-            return;
-        }
-
         Intent intent;
         Bundle bundle = new Bundle();
         bundle.putSerializable("myRoomData", myRoomData);
         bundle.putSerializable("myUserData", myUserData);
+        isRightNavigated = true;
 
-        if (str.equals("테스트용 1")) {
+        if (str.equals("테스트용1")) {
             intent = new Intent(getApplicationContext(), GameFirstActivity.class);
             intent.putExtras(bundle);
             startActivity(intent);
-        } else if (str.equals("테스트용 2")) {
+        } else if (str.equals("테스트용2")) {
             Toast.makeText(getApplicationContext(),"22222", Toast.LENGTH_SHORT).show();
-        } else if (str.equals("테스트용 3")) {
+        } else if (str.equals("테스트용3")) {
             Toast.makeText(getApplicationContext(),"33333", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(),"Null", Toast.LENGTH_SHORT).show();
@@ -237,31 +233,27 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     private boolean isAdmin() {
-        final boolean[] exists = {false};
-        roomRef.child("roomAdminID").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String adminId = dataSnapshot.getValue(String.class);
-                if (myUserData.getUID().equals(adminId)) {
-                    exists[0] = true;
-                }
-            }
+        return myUserData.getUID().equals(myRoomData.getRoomAdminID());
+    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // ...
+    private boolean isUserInRoom() {
+        List<UserData> userList = myRoomData.getUserList();
+        for (UserData user : userList) {
+            if (user.getUID().equals(myUserData.getUID())) {
+                return true;
             }
-        });
-
-        return exists[0];
+        }
+        return false;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
-        removeUser();
-        finish();
+        if (!isRightNavigated) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            removeUser();
+            finish();
+        }
     }
 }

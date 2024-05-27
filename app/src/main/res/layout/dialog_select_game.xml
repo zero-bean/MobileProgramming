@@ -32,7 +32,7 @@
             android:id="@+id/selectGameFirstRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="테스트용 1"
+            android:text="테스트용1"
             android:textColor="@color/primary_on"
             android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
             android:id="@+id/selectGameSecondRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="테스트용 2"
+            android:text="테스트용2"
             android:textColor="@color/primary_on"
             android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
             android:id="@+id/selectGameThirdRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="테스트용 3"
+            android:text="테스트용3"
             android:textColor="@color/primary_on"
             android:textStyle="bold" />
 
