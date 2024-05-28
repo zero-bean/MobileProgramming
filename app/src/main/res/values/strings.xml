@@ -12,4 +12,6 @@
 
     <string name="nameLabel">닉네임</string>
     <string name="title_activity_game_room_list">GameRoomListActivity</string>
+
+    <string name="profile_change_name_placeholder">변경할 이름</string>
 </resources>

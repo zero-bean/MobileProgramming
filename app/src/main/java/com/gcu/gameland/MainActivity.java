@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.gcu.gameland.Dialog.FindRoomDialog;
+import com.gcu.gameland.Dialog.ProfileChangeDialog;
 import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.TitleWriteDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
@@ -34,6 +36,7 @@ import com.gcu.gameland.DTO.UserData;
 public class MainActivity extends AppCompatActivity {
     private final DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
     private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
+    private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private final FirebaseUser currentUser = mAuth.getCurrentUser();
     private ProgressDialog progressDialog;
@@ -100,6 +103,28 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         String roomID = dialog.getEnteredText();
                         enterLobby(dialog, roomID);
+                    }
+                });
+            }
+        });
+
+        changeProfileBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProfileChangeDialog dialog = new ProfileChangeDialog(MainActivity.this);
+                dialog.show();
+
+                dialog.setOnConfirmClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+
+                dialog.setOnUploadClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        
                     }
                 });
             }
