@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
@@ -117,14 +118,20 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        String newName = dialog.getNameText();
+                        if (newName != null) {
+                            myUserData.setNickName(newName);
+                            updateUserData(myUserData);
+                            updateProfile(myUserData);
+                        }
+                        dialog.dismiss();
                     }
                 });
 
                 dialog.setOnUploadClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        
+
                     }
                 });
             }
@@ -170,8 +177,7 @@ public class MainActivity extends AppCompatActivity {
                     String name = currentUser.getDisplayName();
                     String image = currentUser.getPhotoUrl() != null ? currentUser.getPhotoUrl().toString() : null;
                     myUserData = new UserData(UID, name, image);
-
-                    userRef.setValue(myUserData);
+                    updateUserData(myUserData);
                 } else {
                     myUserData = snapshot.getValue(UserData.class);
                 }
@@ -187,15 +193,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void changeProfile() {
+        StorageReference storageRef = storage.getReference();
+    }
+
     private void updateProfile(UserData userData) {
         profileNameTextView.setText(userData.getNickName());
-
         String photoUrl = userData.getImageURL();
         if (photoUrl != null) {
             Glide.with(this).load(photoUrl).into(profileImageView);
         }
 
         progressDialog.hide();
+    }
+
+    private void updateUserData(UserData userData) {
+        DatabaseReference userRef = usersRef.child(currentUser.getUid());
+        userRef.setValue(userData);
     }
 
     private RoomData createLobby(String roomName, int roomNumber) {
