@@ -3,6 +3,7 @@ package com.gcu.gameland;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -17,6 +19,8 @@ import com.gcu.gameland.Dialog.FindRoomDialog;
 import com.gcu.gameland.Dialog.ProfileChangeDialog;
 import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.TitleWriteDialog;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -26,6 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
@@ -35,13 +40,14 @@ import com.gcu.gameland.DTO.RoomData;
 import com.gcu.gameland.DTO.UserData;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int PICK_IMAGE_REQUEST = 1;
     private final DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
     private final DatabaseReference roomsRef = FirebaseDatabase.getInstance().getReference().child("rooms");
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private final FirebaseUser currentUser = mAuth.getCurrentUser();
     private ProgressDialog progressDialog;
-    private UserData myUserData;
+    private ProfileChangeDialog profileChangeDialog;
     private CircularImageView profileImageView;
     private TextView profileNameTextView;
     private Button createRoomBtn;
@@ -49,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private Button findRoomBtn;
     private Button changeProfileBtn;
     private Button logoutBtn;
+    private UserData myUserData;
+    private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,26 +120,33 @@ public class MainActivity extends AppCompatActivity {
         changeProfileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProfileChangeDialog dialog = new ProfileChangeDialog(MainActivity.this);
-                dialog.show();
+                profileChangeDialog = new ProfileChangeDialog(MainActivity.this);
+                profileChangeDialog.show();
 
-                dialog.setOnConfirmClickListener(new View.OnClickListener() {
+                profileChangeDialog.setOnConfirmClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String newName = dialog.getNameText();
-                        if (newName != null) {
-                            myUserData.setNickName(newName);
-                            updateUserData(myUserData);
-                            updateProfile(myUserData);
+                        String newName = profileChangeDialog.getNameText();
+                        if (imageUri != null) {
+                            if (newName != null) {
+                                myUserData.setNickName(newName);
+                            }
+                            uploadImage(imageUri);
+                        } else {
+                            if (newName != null) {
+                                myUserData.setNickName(newName);
+                                updateUserData(myUserData);
+                                updateProfile(myUserData);
+                            }
                         }
-                        dialog.dismiss();
+                        profileChangeDialog.dismiss();
                     }
                 });
 
-                dialog.setOnUploadClickListener(new View.OnClickListener() {
+                profileChangeDialog.setOnUploadClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        openFileChooser();
                     }
                 });
             }
@@ -193,10 +208,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void changeProfile() {
-        StorageReference storageRef = storage.getReference();
-    }
-
     private void updateProfile(UserData userData) {
         profileNameTextView.setText(userData.getNickName());
         String photoUrl = userData.getImageURL();
@@ -205,6 +216,48 @@ public class MainActivity extends AppCompatActivity {
         }
 
         progressDialog.hide();
+    }
+
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();
+            Glide.with(this).load(imageUri).into(profileChangeDialog.getImageView());
+        }
+    }
+
+    private void uploadImage(Uri uri) {
+        final StorageReference fileReference = storage.getReference().child("profiles/" + currentUser.getUid() + ".jpg");
+        fileReference.putFile(uri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageURL = uri.toString();
+                                myUserData.setImageURL(imageURL);
+                                updateUserData(myUserData);
+                                updateProfile(myUserData);
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // 이미지 업로드 실패
+                        Toast.makeText(MainActivity.this, "이미지 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void updateUserData(UserData userData) {

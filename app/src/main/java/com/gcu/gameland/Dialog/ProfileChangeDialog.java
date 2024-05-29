@@ -2,6 +2,7 @@ package com.gcu.gameland.Dialog;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -11,7 +12,10 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 
 import com.gcu.gameland.R;
+import com.google.firebase.storage.FirebaseStorage;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 public class ProfileChangeDialog extends Dialog {
@@ -58,5 +62,9 @@ public class ProfileChangeDialog extends Dialog {
 
     public String getNameText() {
         return editText.getText().toString();
+    }
+
+    public ImageView getImageView() {
+        return imageView;
     }
 }
