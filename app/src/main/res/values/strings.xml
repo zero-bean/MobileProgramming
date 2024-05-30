@@ -14,4 +14,31 @@
     <string name="title_activity_game_room_list">GameRoomListActivity</string>
 
     <string name="profile_change_name_placeholder">변경할 이름</string>
+
+    <!-- 게임 이름 -->
+    <string name="game_2">숫자야구</string>
+
+    <!-- baseball game -->
+    <string name="number_1">1</string>
+    <string name="number_2">2</string>
+    <string name="number_3">3</string>
+    <string name="number_4">4</string>
+    <string name="number_5">5</string>
+    <string name="number_6">6</string>
+    <string name="number_7">7</string>
+    <string name="number_8">8</string>
+    <string name="number_9">9</string>
+    <string name="number_0">0</string>
+    <string name="number_1_desc">Number 1</string>
+    <string name="number_2_desc">Number 2</string>
+    <string name="number_3_desc">Number 3</string>
+    <string name="number_4_desc">Number 4</string>
+    <string name="number_5_desc">Number 5</string>
+    <string name="number_6_desc">Number 6</string>
+    <string name="number_7_desc">Number 7</string>
+    <string name="number_8_desc">Number 8</string>
+    <string name="number_9_desc">Number 9</string>
+    <string name="number_0_desc">Number 0</string>
+    <string name="backspace_desc">Backspace</string>
+    <string name="hitbutton_desc">Hit Button</string>
 </resources>

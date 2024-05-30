@@ -221,8 +221,10 @@ public class LobbyActivity extends AppCompatActivity {
             intent = new Intent(getApplicationContext(), GameFirstActivity.class);
             intent.putExtras(bundle);
             startActivity(intent);
-        } else if (str.equals("테스트용2")) {
-            Toast.makeText(getApplicationContext(),"22222", Toast.LENGTH_SHORT).show();
+        } else if (str.equals("숫자야구")) {
+            intent = new Intent(getApplicationContext(), GameBaseballActivity.class);
+            intent.putExtras(bundle);
+            startActivity(intent);
         } else if (str.equals("테스트용3")) {
             Toast.makeText(getApplicationContext(),"33333", Toast.LENGTH_SHORT).show();
         } else {

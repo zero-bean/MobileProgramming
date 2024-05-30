@@ -40,7 +40,7 @@
             android:id="@+id/selectGameSecondRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="테스트용2"
+            android:text="@string/game_2"
             android:textColor="@color/primary_on"
             android:textStyle="bold" />
 
