@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.gcu.gameland.DTO.GameData;
 import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.SelectGameDialog;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -83,8 +84,8 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (isAdmin() && gameName != null) {
-                    DatabaseReference gameRef = roomRef.child("selectedGame");
-                    gameRef.setValue(gameName);
+                    DatabaseReference gameRef = roomRef.child("gameData");
+                    gameRef.setValue(new GameData(gameName));
                 }
             }
         });
@@ -165,7 +166,7 @@ public class LobbyActivity extends AppCompatActivity {
     private void createGameChangeListener() {
         progressDialog.show();
 
-        DatabaseReference selectedGameRef = roomRef.child("selectedGame");
+        DatabaseReference selectedGameRef = roomRef.child("gameData");
         ValueEventListener gameChangeListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -174,10 +175,10 @@ public class LobbyActivity extends AppCompatActivity {
                     return;
                 }
 
-                String selectedGameName = snapshot.getValue(String.class);
-                myRoomData.setSelectedGame(selectedGameName);
+                GameData gameData = snapshot.getValue(GameData.class);
+                String gameName = gameData.getGame();
                 if (isUserInRoom()) {
-                    startGame(selectedGameName);
+                    startGame(gameName);
                 }
                 progressDialog.hide();
 

@@ -92,7 +92,7 @@ public class RoomListActivity extends AppCompatActivity {
                 ArrayList<RoomData> roomDataList = new ArrayList<>();
                 for (DataSnapshot data : snapshot.getChildren()) {
                     RoomData roomData = data.getValue(RoomData.class);
-                    if (roomData != null && roomData.getSelectedGame() == null) {
+                    if (roomData != null && roomData.getGameData() == null) {
                         roomDataList.add(roomData);
                     }
                 }
