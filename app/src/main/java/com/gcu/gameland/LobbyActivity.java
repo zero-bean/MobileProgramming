@@ -92,6 +92,13 @@ public class LobbyActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        //DatabaseReference gameRef = roomRef.child("gameData");
+        //gameRef.removeValue();
+    }
+
     private void initializeFirebase() {
         Intent intent = getIntent();
         myRoomData = (RoomData) intent.getSerializableExtra("myRoomData");
@@ -232,7 +239,7 @@ public class LobbyActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Null", Toast.LENGTH_SHORT).show();
         }
 
-        finish();
+        //finish();
     }
 
     private boolean isAdmin() {

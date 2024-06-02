@@ -4,13 +4,13 @@ import java.io.Serializable;
 
 public class Score implements Serializable {
     private String name;
-    private float score;
+    private int score;
 
     public Score() {
 
     }
 
-    public Score(String name, float score) {
+    public Score(String name, int score) {
         this.name = name;
         this.score = score;
     }
@@ -23,11 +23,11 @@ public class Score implements Serializable {
         this.name = name;
     }
 
-    public float getScore() {
+    public int getScore() {
         return score;
     }
 
-    public void setScore(float score) {
+    public void setScore(int score) {
         this.score = score;
     }
 }

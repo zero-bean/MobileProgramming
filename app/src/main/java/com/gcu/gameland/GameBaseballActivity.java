@@ -1,5 +1,6 @@
 package com.gcu.gameland;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,14 +11,32 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.gcu.gameland.DTO.GameData;
+import com.gcu.gameland.DTO.RoomData;
+import com.gcu.gameland.DTO.Score;
+import com.gcu.gameland.DTO.UserData;
+import com.gcu.gameland.Dialog.GameResultDialog;
+import com.gcu.gameland.Dialog.ProgressDialog;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GameBaseballActivity extends AppCompatActivity {
+    private DatabaseReference roomRef;
+    private RoomData myRoomData;
+    private UserData myUserData;
     int[] comNumbers = new int[4];
     int inputTextCount = 0;
     int hitCount = 1;
@@ -34,8 +53,8 @@ public class GameBaseballActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_baseball_game);
+        initializeFirebase();
 
         comNumbers = getComNumbers();
 
@@ -123,6 +142,7 @@ public class GameBaseballActivity extends AppCompatActivity {
                     if(countCheck[0] == 4) {//out
                         resultCount = "1 [" + userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + " " + userNumbers[3] + "] Out! Congratulation!";
                         hitCount = 1;
+                        sendScore();
                     }else{
                         resultCount = "1 [" + userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + " " + userNumbers[3] + "] S : "
                                 + countCheck[0] + " B : " + countCheck[1];
@@ -152,6 +172,73 @@ public class GameBaseballActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        createGameDataListener();
+    }
+
+    private void initializeFirebase() {
+        Intent intent = getIntent();
+        myRoomData = (RoomData) intent.getSerializableExtra("myRoomData");
+        myUserData = (UserData) intent.getSerializableExtra("myUserData");
+
+        roomRef = FirebaseDatabase.getInstance().getReference()
+                .child("rooms").child(myRoomData.getRoomID());
+    }
+
+    private void createGameDataListener() {
+        DatabaseReference gameRef = roomRef.child("gameData");
+        ValueEventListener gameChangeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    return;
+                }
+
+                GameData gameData = snapshot.getValue(GameData.class);
+                if (isUserInRoom() && !gameData.getScoreList().isEmpty()) {
+                    myRoomData.setGameData(gameData);
+                    GameResultDialog dialog = new GameResultDialog(GameBaseballActivity.this, myRoomData.getGameData());
+                    dialog.show();
+                    dialog.setOnConfirmClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            GameBaseballActivity.this.finish();
+                        }
+                    });
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                //
+            }
+        };
+
+        gameRef.addValueEventListener(gameChangeListener);
+    }
+
+    private boolean isUserInRoom() {
+        List<UserData> userList = myRoomData.getUserList();
+        for (UserData user : userList) {
+            if (user.getUID().equals(myUserData.getUID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void sendScore() {
+        DatabaseReference scoreRef = roomRef.child("gameData").child("scoreList");
+        List<Score> scores = new ArrayList<Score>();
+        scores.add(new Score(myUserData.getNickName(), 1));
+        scoreRef.setValue(scores);
     }
 
     private int[] getCountcheck(int[] comNumbers, int[] userNumbers) {
