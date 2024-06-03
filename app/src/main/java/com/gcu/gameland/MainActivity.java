@@ -19,6 +19,8 @@ import com.gcu.gameland.Dialog.FindRoomDialog;
 import com.gcu.gameland.Dialog.ProfileChangeDialog;
 import com.gcu.gameland.Dialog.ProgressDialog;
 import com.gcu.gameland.Dialog.TitleWriteDialog;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -63,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeWidgets();
+
+        AdView adView = findViewById(R.id.adView);
+        if(adView.getAdUnitId() == null){
+            adView.setAdUnitId("ca-app-pub-6554337366046373~6940747940");
+        }
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
 
         createRoomBtn.setOnClickListener(new View.OnClickListener() {
             @Override
