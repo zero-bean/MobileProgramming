@@ -1,5 +1,6 @@
-package com.rimin.stopwatch;
+package com.gcu.gameland.DTO;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -16,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
+import com.gcu.gameland.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler visibilityHandler;
     private Runnable hideTimeRunnable;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                     gifImageView.setVisibility(View.VISIBLE);
                     Glide.with(MainActivity.this)
                             .asGif()
-                            .load(R.raw.sandclock)
+                            //.load(R.raw.sandclock)
                             .into(gifImageView);
                 } else {
                     Toast.makeText(MainActivity.this, "설정 시간을 입력하세요.", Toast.LENGTH_SHORT).show();
